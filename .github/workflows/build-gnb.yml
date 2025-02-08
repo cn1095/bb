@@ -232,10 +232,7 @@ jobs:
          run: |
               sudo pkg_add gmake 
               sudo pkg_add gcc-11.2.0p14
-              echo "查看gcc"
-              pkg_info -L gcc-11.2.0p14 | grep bin
-              export CC="gcc-11.2.0p14 -static"
-              export CXX="g++-11.2.0p14 -static"
+              export CC="/usr/local/bin/egcc -static"
               gmake -f Makefile.openbsd install
               strip bin/*
               file bin/gnb
