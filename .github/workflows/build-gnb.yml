@@ -43,7 +43,6 @@ jobs:
   build:
     name: Build ${{ matrix.target }}
     strategy:
-      fail-fast: false
       matrix:
         include:
         - target: aarch64-apple-darwin
@@ -165,7 +164,6 @@ jobs:
        run: |
          ARCH=$(uname -m)
          echo "当前运行架构: $ARCH"
-         find /Library/Developer/CommandLineTools -name "crt0.o"
          if [[ "$TARGET" == "x86_64-apple-darwin" ]]; then
              export CC="clang -arch x86_64"
              export CXX="clang++ -arch x86_64"
@@ -174,8 +172,8 @@ jobs:
              export CXX="clang++ -arch arm64"
          fi
           sed -i '' 's|-L/usr/lib||g' Makefile.Darwin
-          sed -i '' 's|CLI_LDFLAGS=.*|CLI_LDFLAGS=-pthread -static|g' Makefile.Darwin
-          sed -i '' 's|GNB_ES_LDFLAGS=.*|GNB_ES_LDFLAGS=-pthread -static|g' Makefile.Darwin
+          sed -i '' 's|CLI_LDFLAGS=.*|CLI_LDFLAGS=-pthread -static-libgcc -static-libstdc++|g' Makefile.Darwin
+          sed -i '' 's|GNB_ES_LDFLAGS=.*|GNB_ES_LDFLAGS=-pthread -static-libgcc -static-libstdc++|g' Makefile.Darwin
           sed -i '' 's|-lssl|-l:libssl.a|g' Makefile.Darwin
           sed -i '' 's|-lcrypto|-l:libcrypto.a|g' Makefile.Darwin
           sed -i '' 's|-lz|-l:libz.a|g' Makefile.Darwin
