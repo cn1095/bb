@@ -43,7 +43,6 @@ jobs:
   build:
     name: Build ${{ matrix.target }}
     strategy:
-      fail-fast: false
       matrix:
         include:
         - target: aarch64-apple-darwin
