@@ -231,14 +231,9 @@ jobs:
          cpu_count: 4
          run: |
               sudo pkg_add gmake 
-              echo "安装gcc"
               sudo pkg_add gcc-11.2.0p14
-              echo "查看gcc"
-              pkg_info | grep gcc
-              ls -l /usr/local/bin/gcc*
-              echo "编译"
-              export CC=/usr/local/bin/gcc-11.2.0
-              export CXX=/usr/local/bin/g++-11.2.0
+              export CC=/usr/local/bin/gcc-11.2.0p14
+              export CXX=/usr/local/bin/gcc-11.2.0p14
               gmake -f Makefile.openbsd install
               strip bin/*
               file bin/gnb
