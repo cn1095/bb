@@ -171,16 +171,10 @@ jobs:
              export CC="clang -arch arm64"
              export CXX="clang++ -arch arm64"
          fi
-          sed -i '' 's|-L/usr/lib||g' Makefile.Darwin
-          sed -i '' 's|CLI_LDFLAGS=.*|CLI_LDFLAGS=-pthread -static-libgcc -static-libstdc++|g' Makefile.Darwin
-          sed -i '' 's|GNB_ES_LDFLAGS=.*|GNB_ES_LDFLAGS=-pthread -static-libgcc -static-libstdc++|g' Makefile.Darwin
-          sed -i '' 's|-lssl|-l:libssl.a|g' Makefile.Darwin
-          sed -i '' 's|-lcrypto|-l:libcrypto.a|g' Makefile.Darwin
-          sed -i '' 's|-lz|-l:libz.a|g' Makefile.Darwin
-          sed -i '' 's|-lminiupnpc|-l:libminiupnpc.a|g' Makefile.Darwin
-          sed -i '' 's|-lnatpmp|-l:libnatpmp.a|g' Makefile.Darwin
          make -f Makefile.Darwin install
          file bin/gnb
+         otool -L bin/gnb
+         bin/gnb -h
      - name: 编译 Liunx Windows
        if: ${{ runner.os == 'Linux' && !endsWith(matrix.target, 'openbsd') && !endsWith(matrix.target, 'freebsd') }}
        run: |
