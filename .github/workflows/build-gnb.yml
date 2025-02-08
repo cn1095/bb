@@ -165,7 +165,7 @@ jobs:
        run: |
          ARCH=$(uname -m)
          echo "当前运行架构: $ARCH"
-         xcode-select --install
+         find /Library/Developer/CommandLineTools -name "crt0.o"
          if [[ "$TARGET" == "x86_64-apple-darwin" ]]; then
              export CC="clang -arch x86_64"
              export CXX="clang++ -arch x86_64"
