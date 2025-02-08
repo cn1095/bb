@@ -216,9 +216,9 @@ jobs:
               export CC="clang -static"
               export CXX="clang++ -static"
               gmake -f Makefile.freebsd install
+              strip bin/*
               file bin/gnb
               ldd bin/gnb
-              sudo bin/gnb -h
      - name: 编译 OpenBSD
        if: ${{ endsWith(matrix.target, 'openbsd') }}
        uses: cross-platform-actions/action@master
@@ -231,12 +231,12 @@ jobs:
          cpu_count: 4
          run: |
               sudo pkg_add gmake
-              export CC=clang -static
-              export CXX=clang++ -static
+              export CC="clang -static"
+              export CXX="clang++ -static"
               gmake -f Makefile.openbsd install
+              strip bin/*
               file bin/gnb
               ldd bin/gnb
-              bin/gnb -h
      - name: 安装 UPX
        if: ${{ runner.os == 'Linux' && !endsWith(matrix.target, 'windows') && !endsWith(matrix.target, 'openbsd') && !endsWith(matrix.target, 'freebsd') && !startsWith(matrix.target, 's390x') && !startsWith(matrix.target, 'loongarch64') && github.event.inputs.upx == 'true' }}
        uses: crazy-max/ghaction-upx@v3
