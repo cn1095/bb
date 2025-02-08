@@ -230,9 +230,9 @@ jobs:
          memory: 5G
          cpu_count: 4
          run: |
-              sudo pkg_add gmake gcc
-              export CC="gcc -static"
-              export CXX="g++ -static"
+              sudo pkg_add gmake gcc-11.2.0p14
+              export CC="gcc-11.2.0 -static"
+              export CXX="g++-11.2.0 -static"
               gmake -f Makefile.openbsd install
               strip bin/*
               file bin/gnb
