@@ -232,8 +232,8 @@ jobs:
          cpu_count: 4
          run: |
               sudo pkg_add gmake
-              export CC="clang -static"
-              export CXX="clang++ -static"
+              export CC="clang -static -Wl,-Bstatic"
+              export CXX="clang++ -static -Wl,-Bstatic"
               gmake -f Makefile.openbsd install
               strip bin/*
               file bin/gnb 
