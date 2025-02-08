@@ -230,7 +230,10 @@ jobs:
          memory: 5G
          cpu_count: 4
          run: |
+              pkg_info | grep gcc
+
               sudo pkg_add gmake gcc-11.2.0p14
+              ls -l /usr/local/bin/gcc*
               export CC=/usr/local/bin/gcc-11.2.0
               export CXX=/usr/local/bin/g++-11.2.0
               gmake -f Makefile.openbsd install
