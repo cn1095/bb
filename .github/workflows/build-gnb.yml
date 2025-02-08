@@ -233,7 +233,7 @@ jobs:
               sudo pkg_add gmake
               export CC="clang -static"
               export CXX="clang++ -static"
-              sed -i '' 's/-pthread/-pthread -static/g' Makefile.openbsd
+              sed -i 's/-pthread/-pthread -static/g' Makefile.openbsd
               gmake -f Makefile.openbsd install
               strip bin/*
               file bin/gnb
