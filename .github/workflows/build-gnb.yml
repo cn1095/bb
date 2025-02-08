@@ -232,8 +232,8 @@ jobs:
          run: |
               sudo pkg_add gmake 
               sudo pkg_add gcc-11.2.0p14
-              ls -l /usr/local/bin/gcc*
-              export PATH="/usr/local/bin:$PATH"
+              echo "查看gcc"
+              pkg_info -L gcc-11.2.0p14 | grep bin
               export CC="gcc-11.2.0p14 -static"
               export CXX="g++-11.2.0p14 -static"
               gmake -f Makefile.openbsd install
