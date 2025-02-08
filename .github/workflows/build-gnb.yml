@@ -43,6 +43,7 @@ jobs:
   build:
     name: Build ${{ matrix.target }}
     strategy:
+      fail-fast: false
       matrix:
         include:
         - target: aarch64-apple-darwin
@@ -230,12 +231,12 @@ jobs:
          memory: 5G
          cpu_count: 4
          run: |
-              sudo pkg_add gmake 
-              sudo pkg_add gcc-11.2.0p14
-              export CC="/usr/local/bin/egcc -static"
+              sudo pkg_add gmake
+              export CC=clang
+              export CXX=clang++
               gmake -f Makefile.openbsd install
               strip bin/*
-              file bin/gnb
+              file bin/gnb 
               ldd bin/gnb || true
               bin/gnb -h
      - name: 安装 UPX
