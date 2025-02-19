@@ -23,15 +23,11 @@ jobs:
       run: |
          mipsel-linux-muslsf-gcc -v
          echo $CFLAGS
-         mkdir -p bin
-         cd bin
+
+         sed -i 's/SHARED/STATIC/g' MQTTPacket/src/CMakeLists.txt
+         mkdir -p bin && cd bin
          export CC="$CC -static"
-         cmake -DCMAKE_EXE_LINKER_FLAGS="-static" \
-          -DBUILD_SHARED_LIBS=OFF \
-          -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
-          -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
-          -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
-          ..
+         cmake ..
          make
          ls 
 
