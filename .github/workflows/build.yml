@@ -18,7 +18,11 @@ jobs:
         target: mipsel-linux-muslsf
         static: true
         gccpath: /tmp
-
+    - name: 安装 UPX
+      uses: crazy-max/ghaction-upx@v3
+      with:
+        version: latest
+        install-only: true
     - name: 编译
       run: |
          mipsel-linux-muslsf-gcc -v
@@ -30,10 +34,13 @@ jobs:
          export CC="$CC -static"
          cmake ..
          make
-         make install DESTDIR=$(pwd)/bin
-         cd ../bin
-         ls 
+         
+         cp -f MQTTClient-C/samples/linux/stdoutsubc bin/stdoutsubc
+         file bin/stdoutsubc
+         $STRIP bin/stdoutsubc
+         file bin/stdoutsubc
+         upx --lzma --best bin/stdoutsubc
     - uses: actions/upload-artifact@v4
       with:
         name: bafa
-        path: bin
+        path: bin/stdoutsubc
