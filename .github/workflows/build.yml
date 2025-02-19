@@ -27,6 +27,7 @@ jobs:
          cd bin
          export CC="$CC -static"
          cmake -DCMAKE_EXE_LINKER_FLAGS="-static" \
+          -DBUILD_SHARED_LIBS=OFF \
           -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
           -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
           -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
