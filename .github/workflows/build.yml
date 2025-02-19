@@ -26,14 +26,14 @@ jobs:
 
          sed -i 's/SHARED/STATIC/g' MQTTPacket/src/CMakeLists.txt
          sed -i 's/SHARED/STATIC/g' MQTTClient-C/src/CMakeLists.txt
-         mkdir -p bin && cd bin
+         mkdir -p build && cd build
          export CC="$CC -static"
          cmake ..
          make
+         mkdir -p bin
+         make install DESTDIR=$(pwd)/bin
+         cd bin
          ls 
-         file MQTTClient/*
-         file MQTTClient-C/*
-         file MQTTPacket/*
     - uses: actions/upload-artifact@v4
       with:
         name: bafa
