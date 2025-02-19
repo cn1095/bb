@@ -25,6 +25,7 @@ jobs:
          echo $CFLAGS
 
          sed -i 's/SHARED/STATIC/g' MQTTPacket/src/CMakeLists.txt
+         sed -i 's/SHARED/STATIC/g' MQTTClient-C/src/CMakeLists.txt
          mkdir -p bin && cd bin
          export CC="$CC -static"
          cmake ..
