@@ -35,7 +35,7 @@ jobs:
          cmake ..
          make
          
-         cp -f MQTTClient-C/samples/linux/stdoutsubc bin/stdoutsubc
+         cp -f MQTTClient-C/samples/linux/stdoutsubc bin/
          file bin/stdoutsubc
          $STRIP bin/stdoutsubc
          file bin/stdoutsubc
