@@ -26,13 +26,12 @@ jobs:
 
          sed -i 's/SHARED/STATIC/g' MQTTPacket/src/CMakeLists.txt
          sed -i 's/SHARED/STATIC/g' MQTTClient-C/src/CMakeLists.txt
-         mkdir -p build && cd build
+         mkdir -p build bin && cd build
          export CC="$CC -static"
          cmake ..
          make
-         mkdir -p bin
          make install DESTDIR=$(pwd)/bin
-         cd bin
+         cd ../bin
          ls 
     - uses: actions/upload-artifact@v4
       with:
