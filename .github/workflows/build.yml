@@ -10,7 +10,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-        repository: eclipse-paho/paho.mqtt.embedded-c
+        repository: cn1095/paho.mqtt.embedded-c #eclipse-paho/paho.mqtt.embedded-c
         ref: master 
     - name: 下载gcc
       uses: lmq8267/dl-musl@main
