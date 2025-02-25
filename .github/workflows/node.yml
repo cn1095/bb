@@ -10,8 +10,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-       repository: 'nodejs/node'
-       
+       repository: nodejs/node
+       ref: v23.x
     - name: 下载gcc
       uses: lmq8267/dl-musl@main
       with:
@@ -28,9 +28,8 @@ jobs:
          export CXXFLAGS="$CXXFLAGS -march=mips32r2 -msoft-float -DV8_TARGET_ARCH_MIPSEL -DV8_HOST_ARCH_X64"
          export CFLAGS="$CFLAGS -march=mips32r2 -msoft-float -DV8_TARGET_ARCH_MIPSEL -DV8_HOST_ARCH_X64"
          export GYP_DEFINES="target_arch=mipsel v8_target_arch=mipsel"
-         ./configure --dest-os=linux --dest-cpu=mipsel --cross-compiling --without-ssl --without-node-snapshot --with-intl=small-icu --with-icu-locales=zh,en --with-quic --fully-static --with-mips-float-abi soft --enable-static --prefix=/opt/bin
-         make -j$(nproc) || true
-         cat deps/v8/include/v8config.h 
+         ./configure --dest-os=linux --dest-cpu=mipsel --cross-compiling --without-ssl --without-node-snapshot --with-intl=none --with-quic --fully-static --with-mips-float-abi soft --enable-static --prefix=/opt/bin
+         make -j$(nproc) 
          make install
          ls /opt/bin
          
