@@ -21,6 +21,10 @@ jobs:
 
     - name: build
       run: |
+         sudo apt update
+         sudo apt install qemu-user qemu-user-static binfmt-support
+         sudo update-binfmts --enable qemu-mipsel
+         export QEMU_BINARY=qemu-mipsel
          mkdir -p /opt/bin
          ./configure --help || true
          export V8_TARGET_ARCH=mips
