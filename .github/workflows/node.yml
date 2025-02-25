@@ -11,7 +11,7 @@ jobs:
       uses: actions/checkout@v4
       with:
        repository: nodejs/node
-       ref: v23.x
+       ref: v18.x
     - name: 下载gcc
       uses: lmq8267/dl-musl@main
       with:
@@ -23,12 +23,13 @@ jobs:
       run: |
          mkdir -p /opt/bin
          ./configure --help || true
-         #export V8_TARGET_ARCH=mipsel
-         #export V8_HOST_ARCH=x86_64
+         export V8_TARGET_ARCH=mips
+         export V8_HOST_ARCH=x86_64
          #export CXXFLAGS="$CXXFLAGS -march=mips32r2 -msoft-float -DV8_TARGET_ARCH_MIPSEL -DV8_HOST_ARCH_X64"
          #export CFLAGS="$CFLAGS -march=mips32r2 -msoft-float -DV8_TARGET_ARCH_MIPSEL -DV8_HOST_ARCH_X64"
          #export GYP_DEFINES="target_arch=mipsel v8_target_arch=mipsel"
-         ./configure --dest-os=linux --without-bundled-v8 --dest-cpu=mipsel --cross-compiling --without-ssl --without-node-snapshot --with-intl=none --fully-static --with-mips-float-abi soft --enable-static --prefix=/opt/bin
+         sed -i 's/int64_/int32_/g' deps/v8/src/compiler/backend/mips/code-generator-mips.cc
+         ./configure --dest-os=linux --dest-cpu=mipsel --cross-compiling --without-ssl --without-node-snapshot --with-intl=none --fully-static --with-mips-float-abi soft --enable-static --prefix=/opt/bin
          make -j$(nproc) 
          make install
          ls /opt/bin
