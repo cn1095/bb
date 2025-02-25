@@ -23,6 +23,8 @@ jobs:
       run: |
          mkdir -p /opt/bin
          ./configure --help || true
+         export CFLAGS="$CFLAGS -m32" \
+         export CXXFLAGS="$CXXFLAGS -m32"
          ./configure --dest-os=linux --dest-cpu=mipsel --cross-compiling --without-node-snapshot --with-intl=small-icu --with-icu-locales=zh,en --with-quic --fully-static --with-mips-float-abi soft --enable-static --prefix=/opt/bin
          make -j$(nproc)
          make install
