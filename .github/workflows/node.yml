@@ -29,7 +29,8 @@ jobs:
          export CFLAGS="$CFLAGS -march=mips32r2 -msoft-float -DV8_TARGET_ARCH_MIPSEL -DV8_HOST_ARCH_X64"
          export GYP_DEFINES="target_arch=mipsel v8_target_arch=mipsel"
          ./configure --dest-os=linux --dest-cpu=mipsel --cross-compiling --without-ssl --without-node-snapshot --with-intl=small-icu --with-icu-locales=zh,en --with-quic --fully-static --with-mips-float-abi soft --enable-static --prefix=/opt/bin
-         make -j$(nproc)
+         make -j$(nproc) || true
+         cat deps/v8/include/v8config.h 
          make install
          ls /opt/bin
          
