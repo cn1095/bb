@@ -22,7 +22,7 @@ jobs:
     - name: build
       run: |
          ./configure --help || true
-         ./configure --dest-cpu=mipsel --without-snapshot --static --without-openssl
+         ./configure --dest-cpu=mipsel --cross-compiling --without-node-snapshot --without-ssl --fully-static --partly-static --with-mips-float-abi soft --enable-static
          make
         
 
