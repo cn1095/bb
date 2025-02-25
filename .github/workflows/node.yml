@@ -29,9 +29,9 @@ jobs:
          ./configure --help || true
          #export V8_TARGET_ARCH=mips
          #export V8_HOST_ARCH=x86_64
-         #export CXXFLAGS="$CXXFLAGS -march=mips32r2 -msoft-float -DV8_TARGET_ARCH_MIPSEL -DV8_HOST_ARCH_X64"
-         #export CFLAGS="$CFLAGS -march=mips32r2 -msoft-float -DV8_TARGET_ARCH_MIPSEL -DV8_HOST_ARCH_X64"
-         #export GYP_DEFINES="target_arch=mipsel v8_target_arch=mipsel"
+         export CXXFLAGS="$CXXFLAGS -march=mips32r2 -msoft-float -DV8_TARGET_ARCH_MIPSEL -DV8_HOST_ARCH_X64"
+         export CFLAGS="$CFLAGS -march=mips32r2 -msoft-float -DV8_TARGET_ARCH_MIPSEL -DV8_HOST_ARCH_X64"
+         export GYP_DEFINES="target_arch=mipsel v8_target_arch=mipsel"
          #sed -i 's/int64_/int32_/g' deps/v8/src/compiler/backend/mips/code-generator-mips.cc
          #sed -i '/int __detect_fp64_mode(void) {/,/}/c\
          #int __detect_fp64_mode(void) {\n#ifdef FPU_MODE_FP64\n  return 1;\n#else\n  return 0;\n#endif\n}' deps/v8/src/base/cpu.cc
