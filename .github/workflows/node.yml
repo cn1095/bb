@@ -1,4 +1,4 @@
-name: Rust-static-build
+name: node
 on:
   workflow_dispatch:
 env:
@@ -9,6 +9,9 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+       repository: 'nodejs/node'
+       
     - name: 下载gcc
       uses: lmq8267/dl-musl@main
       with:
@@ -18,8 +21,10 @@ jobs:
 
     - name: build
       run: |
-         aarch64-linux-musl-gcc -v
-         echo $CFLAGS
+         ./configure --help || true
+         ./configure --dest-cpu=mipsel --without-snapshot --static --without-openssl
+         make
+        
 
     - uses: actions/upload-artifact@v4
       with:
