@@ -1,0 +1,27 @@
+name: Rust-static-build
+on:
+  workflow_dispatch:
+env:
+  TZ: Asia/Shanghai
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: 下载gcc
+      uses: lmq8267/dl-musl@main
+      with:
+        target: mipsel-linux-muslsf
+        static: true
+        gccpath: /tmp
+
+    - name: build
+      run: |
+         aarch64-linux-musl-gcc -v
+         echo $CFLAGS
+
+    - uses: actions/upload-artifact@v4
+      with:
+        name: node
+        path: bin
