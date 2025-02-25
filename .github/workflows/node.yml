@@ -21,12 +21,14 @@ jobs:
 
     - name: build
       run: |
+         mkdir -p /opt/bin
          ./configure --help || true
-         ./configure --dest-cpu=mipsel --cross-compiling --without-node-snapshot --without-ssl --fully-static --partly-static --with-mips-float-abi soft --enable-static
-         make
-        
-
+         ./configure --dest-os=linux --dest-cpu=mipsel --cross-compiling --without-node-snapshot --with-intl=small-icu --with-icu-locales=zh,en --with-quic --fully-static --with-mips-float-abi soft --enable-static --prefix=/opt/bin
+         make -j$(nproc)
+         make install
+         ls /opt/bin
+         
     - uses: actions/upload-artifact@v4
       with:
         name: node
-        path: bin
+        path: /opt/bin
