@@ -10,7 +10,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-       repository: nodejs/node
+       repository: cn1095/node
        ref: v18.x
     - name: 下载gcc
       uses: lmq8267/dl-musl@main
@@ -32,9 +32,9 @@ jobs:
          #export CXXFLAGS="$CXXFLAGS -march=mips32r2 -msoft-float -DV8_TARGET_ARCH_MIPSEL -DV8_HOST_ARCH_X64"
          #export CFLAGS="$CFLAGS -march=mips32r2 -msoft-float -DV8_TARGET_ARCH_MIPSEL -DV8_HOST_ARCH_X64"
          #export GYP_DEFINES="target_arch=mipsel v8_target_arch=mipsel"
-         sed -i 's/int64_/int32_/g' deps/v8/src/compiler/backend/mips/code-generator-mips.cc
-         sed -i '/int __detect_fp64_mode(void) {/,/}/c\
-         int __detect_fp64_mode(void) {\n#ifdef FPU_MODE_FP64\n  return 1;\n#else\n  return 0;\n#endif\n}' deps/v8/src/base/cpu.cc
+         #sed -i 's/int64_/int32_/g' deps/v8/src/compiler/backend/mips/code-generator-mips.cc
+         #sed -i '/int __detect_fp64_mode(void) {/,/}/c\
+         #int __detect_fp64_mode(void) {\n#ifdef FPU_MODE_FP64\n  return 1;\n#else\n  return 0;\n#endif\n}' deps/v8/src/base/cpu.cc
          ./configure --dest-os=linux --dest-cpu=mipsel --cross-compiling --without-node-snapshot --with-intl=small-icu --with-icu-locales=zh,en --fully-static --with-mips-float-abi soft --enable-static --prefix=/opt/bin
          make -j$(nproc) 
          make install
