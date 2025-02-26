@@ -1,0 +1,31 @@
+name: php
+on:
+  workflow_dispatch:
+env:
+  TZ: Asia/Shanghai
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: 下载gcc
+      uses: lmq8267/dl-musl@main
+      with:
+        target: mipsel-linux-muslsf
+        static: true
+        gccpath: /tmp
+
+    - name: build
+      run: |
+         curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
+         chmod +x ./spc
+         ./spc --version
+         ./spc doctor --auto-fix
+         ./spc download --with-php=8.2 --for-extensions "apcu,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,gd,iconv,intl,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,spx,sqlite3,tokenizer,uuid,uv,xml,xmlreader,xmlwriter,xsl,zip,zlib"
+         ./spc install-pkg upx
+         ./spc build --build-all "apcu,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,gd,iconv,intl,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,spx,sqlite3,tokenizer,uuid,uv,xml,xmlreader,xmlwriter,xsl,zip,zlib" --enable-zts --with-upx-pack --build-cli --build-fpm
+    - uses: actions/upload-artifact@v4
+      with:
+        name: php
+        path: /opt/bin
