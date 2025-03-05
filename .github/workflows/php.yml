@@ -35,11 +35,11 @@ jobs:
          #export CONFIGURE_HOST="mipsel-linux-muslsf"
          #export CFLAGS="$CFLAGS -Wno-error=missing-include-dirs"
          #export CXXFLAGS="$CXXFLAGS -Wno-error=missing-include-dirs"
-         #sudo apt update
-         #sudo apt install qemu-user qemu-user-static binfmt-support
-         #sudo update-binfmts --enable qemu-mipsel
+         sudo apt update
+         sudo apt install qemu-user qemu-user-static binfmt-support
+         sudo update-binfmts --enable qemu-mipsel
          sudo cp -rf $STRIP $(which strip)
-         #export QEMU_BINARY=qemu-mipsel
+         export QEMU_BINARY=qemu-mipsel
          #./spc doctor --auto-fix
          export SPC_LINUX_DEFAULT_CC=mipsel-linux-muslsf-gcc
          export SPC_LINUX_DEFAULT_CXX=mipsel-linux-muslsf-g++
