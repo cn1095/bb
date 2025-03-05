@@ -21,6 +21,7 @@ jobs:
          curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
          chmod +x ./spc
          ./spc --version
+         export CONFIGURE_HOST="mipsel-linux-muslsf"
          #./spc doctor --auto-fix
          ./spc download --with-php=8.2 --for-extensions "apcu,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,gd,iconv,intl,mbregex,mbstring,mysqli,mysqlnd,opcache,openssl,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,spx,sqlite3,tokenizer,uuid,uv,xml,xmlreader,xmlwriter,xsl,zip,zlib"
          ./spc install-pkg upx
