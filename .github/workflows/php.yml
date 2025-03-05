@@ -19,7 +19,14 @@ jobs:
         static: true
         gccpath: /tmp
     - name: spc
-      run: chmod +x bin/setup-runtime && bin/setup-runtime && bin/composer install && chmod +x bin/spc && bin/spc --version
+      run: |
+        
+         export SPC_LINUX_DEFAULT_CC=mipsel-linux-muslsf-gcc
+         export SPC_LINUX_DEFAULT_CXX=mipsel-linux-muslsf-g++
+         export SPC_LINUX_DEFAULT_AR=mipsel-linux-muslsf-ar
+         export SPC_PHP_DEFAULT_OPTIMIZE_CFLAGS="${CFLAGS}"
+         export SPC_PHP_DEFAULT_LD_LIBRARY_PATH_CMD="${LD_LIBRARY_PATH}"
+         chmod +x bin/setup-runtime && bin/setup-runtime && bin/composer install && chmod +x bin/spc && bin/spc --version
     - name: build
       run: |
          curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
@@ -34,9 +41,11 @@ jobs:
          sudo cp -rf $STRIP $(which strip)
          #export QEMU_BINARY=qemu-mipsel
          #./spc doctor --auto-fix
-         export SPC_LINUX_DEFAULT_CC=$CC
-         export SPC_LINUX_DEFAULT_CXX=$CXX
-         export SPC_LINUX_DEFAULT_AR=$AR
+         export SPC_LINUX_DEFAULT_CC=mipsel-linux-muslsf-gcc
+         export SPC_LINUX_DEFAULT_CXX=mipsel-linux-muslsf-g++
+         export SPC_LINUX_DEFAULT_AR=mipsel-linux-muslsf-ar
+         export SPC_PHP_DEFAULT_OPTIMIZE_CFLAGS="${CFLAGS}"
+         export SPC_PHP_DEFAULT_LD_LIBRARY_PATH_CMD="${LD_LIBRARY_PATH}"
          bin/spc download --with-php=8.2 --for-extensions "apcu,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,openssl,filter,gd,iconv,intl,mbregex,mbstring,mysqli,mysqlnd,opcache,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,spx,sqlite3,tokenizer,uuid,uv,xml,xmlreader,xmlwriter,xsl,zip,zlib"
          bin/spc install-pkg upx
          bin/spc build --build-all "apcu,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,gd,iconv,intl,openssl,mbregex,mbstring,mysqli,mysqlnd,opcache,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,spx,sqlite3,tokenizer,uuid,uv,xml,xmlreader,xmlwriter,xsl,zip,zlib" --with-upx-pack --debug --build-all
