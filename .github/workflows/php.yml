@@ -18,12 +18,13 @@ jobs:
         target: mipsel-linux-muslsf
         static: true
         gccpath: /tmp
-
+    - name: spc
+      run: chmod +x bin/setup-runtime && bin/setup-runtime && bin/composer install && chmod +x bin/spc && bin/spc --version
     - name: build
       run: |
          curl -fsSL -o spc https://dl.static-php.dev/static-php-cli/spc-bin/nightly/spc-linux-x86_64
          chmod +x ./spc
-         ./spc --version
+         bin/spc --version
          #export CONFIGURE_HOST="mipsel-linux-muslsf"
          #export CFLAGS="$CFLAGS -Wno-error=missing-include-dirs"
          #export CXXFLAGS="$CXXFLAGS -Wno-error=missing-include-dirs"
@@ -36,9 +37,9 @@ jobs:
          export SPC_LINUX_DEFAULT_CC=$CC
          export SPC_LINUX_DEFAULT_CXX=$CXX
          export SPC_LINUX_DEFAULT_AR=$AR
-         ./spc download --with-php=8.2 --for-extensions "apcu,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,openssl,filter,gd,iconv,intl,mbregex,mbstring,mysqli,mysqlnd,opcache,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,spx,sqlite3,tokenizer,uuid,uv,xml,xmlreader,xmlwriter,xsl,zip,zlib"
-         ./spc install-pkg upx
-         ./spc build --build-all "apcu,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,gd,iconv,intl,openssl,mbregex,mbstring,mysqli,mysqlnd,opcache,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,spx,sqlite3,tokenizer,uuid,uv,xml,xmlreader,xmlwriter,xsl,zip,zlib" --with-upx-pack --debug --build-all
+         bin/spc download --with-php=8.2 --for-extensions "apcu,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,openssl,filter,gd,iconv,intl,mbregex,mbstring,mysqli,mysqlnd,opcache,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,spx,sqlite3,tokenizer,uuid,uv,xml,xmlreader,xmlwriter,xsl,zip,zlib"
+         bin/spc install-pkg upx
+         bin/spc build --build-all "apcu,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,gd,iconv,intl,openssl,mbregex,mbstring,mysqli,mysqlnd,opcache,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,spx,sqlite3,tokenizer,uuid,uv,xml,xmlreader,xmlwriter,xsl,zip,zlib" --with-upx-pack --debug --build-all
     - uses: actions/upload-artifact@v4
       with:
         name: php
