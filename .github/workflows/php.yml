@@ -22,6 +22,8 @@ jobs:
          chmod +x ./spc
          ./spc --version
          export CONFIGURE_HOST="mipsel-linux-muslsf"
+         export CFLAGS="$CFLAGS -Wno-error=missing-include-dirs"
+         export CXXFLAGS="$CXXFLAGS -Wno-error=missing-include-dirs"
          sudo apt update
          sudo apt install qemu-user qemu-user-static binfmt-support
          sudo update-binfmts --enable qemu-mipsel
