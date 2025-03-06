@@ -230,16 +230,16 @@ jobs:
          export SPC_PHP_DEFAULT_OPTIMIZE_CFLAGS="${CFLAGS}"
          export SPC_PHP_DEFAULT_LD_LIBRARY_PATH_CMD="${LD_LIBRARY_PATH}"
 
-         if [[ "${{ env.upx }}" = "true" ]] ; then
-           php_upx="--with-upx-pack"
-         fi
          bin/spc build --build-cli --build-fpm "${{ env.option }}" --with-libs="libjpeg" --debug
+         
          ls buildroot/bin
          file buildroot/bin/php || true
          cp -r buildroot/bin/php buildroot/bin/php_upx
          cp -r buildroot/bin/php-fpm buildroot/bin/php-fpm_upx
          upx --lzma --best buildroot/bin/php_upx
          upx --lzma --best buildroot/bin/php-fpm_upx
+
+         echo "haxi=$(git rev-parse HEAD)" >> $GITHUB_ENV
          echo "build_time=$(date '+%Y年%m月%d日%H:%M:%S' | jq -sRr @uri)" >> $GITHUB_ENV
          
     - uses: actions/upload-artifact@v4
