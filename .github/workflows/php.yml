@@ -6,11 +6,6 @@ on:
         description: '编译crazywhalecc/static-php-cli源码的分支或版本号，默认主分支main'
         required: true
         default: 'main'
-      upx:
-        description: '是否使用upx压缩二进制程序'
-        required: true
-        default: false
-        type: boolean
       tag:
         description: '请选择php版本'
         required: true
@@ -30,7 +25,6 @@ on:
 env:
   TZ: Asia/Shanghai
   tag: "${{ github.event.inputs.tag }}"
-  upx: "${{ github.event.inputs.upx }}"
   option: "${{ github.event.inputs.option }}"
 permissions:
   contents: write
@@ -91,8 +85,6 @@ jobs:
          sed -i 's|/usr/local/musl/{$CFLAGS}-linux-musl/lib| |' src/SPC/util/GlobalEnvManager.php
          
          sed -i "s|linux-{\$this->builder->getOption('arch')}{\$clang_postfix}|linux-mips32|" src/SPC/builder/linux/library/openssl.php
-
-         sed -i 's|--best|--lzma --best|' src/SPC/builder/linux/LinuxBuilder.php
          
          echo "<?php" > src/SPC/builder/linux/library/icu.php
          echo "declare(strict_types=1);" >> src/SPC/builder/linux/library/icu.php
@@ -222,10 +214,13 @@ jobs:
          export QEMU_BINARY=qemu-mipsel
          
          bin/spc download --with-php=${{ env.option }} --for-extensions "${{ env.option }}"
-         if [[ "${{ env.upx }}" = "true" ]] ; then
-           bin/spc install-pkg upx
-         fi
          
+    - name: UPX
+      uses: crazy-max/ghaction-upx@v3
+      with:
+        version: latest
+        install-only: true
+        
     - name: build
       run: |
          rm -rf /tmp/mipsel-linux-muslsf-cross/mipsel-linux-muslsf/lib/*.la
@@ -238,9 +233,13 @@ jobs:
          if [[ "${{ env.upx }}" = "true" ]] ; then
            php_upx="--with-upx-pack"
          fi
-         bin/spc build --build-cli --build-fpm "${{ env.option }}" --with-libs="libjpeg" $php_upx --debug
+         bin/spc build --build-cli --build-fpm "${{ env.option }}" --with-libs="libjpeg" --debug
          ls buildroot/bin
          file buildroot/bin/php || true
+         cp -r buildroot/bin/php buildroot/bin/php_upx
+         cp -r buildroot/bin/php-fpm buildroot/bin/php-fpm_upx
+         upx --lzma --best buildroot/bin/php_upx
+         upx --lzma --best buildroot/bin/php-fpm_upx
          echo "build_time=$(date '+%Y年%m月%d日%H:%M:%S' | jq -sRr @uri)" >> $GITHUB_ENV
          
     - uses: actions/upload-artifact@v4
@@ -261,12 +260,16 @@ jobs:
           ```
           ${{ env.option }}
           ```
+
+          `_upx` 后缀的为压缩后的程序
           
           [官方源码](https://github.com/crazywhalecc/static-php-cli)
            
         tag_name: ${{ env.tag }}
         files: |
           buildroot/bin/php
+          buildroot/bin/php_upx
           buildroot/bin/php-fpm
+          buildroot/bin/php-fpm_upx
           buildroot/etc/php-fpm.conf.default
           buildroot/etc/php-fpm.d/www.conf.default
