@@ -59,10 +59,10 @@ jobs:
          sed -i '/-D_FILE_OFFSET_BITS=64/d' src/SPC/util/GlobalEnvManager.php
          sed -i 's|/usr/local/musl/{$CFLAGS}-linux-musl/lib| |' src/SPC/util/GlobalEnvManager.php
          
-         sed -i "s|linux-{$this->builder->getOption('arch')}{\$clang_postfix}|linux-mips32|" src/SPC/builder/linux/library/openssl.php
+         sed -i "s|linux-{\$this->builder->getOption('arch')}{\$clang_postfix}|linux-mips32|" src/SPC/builder/linux/library/openssl.php
          echo "############################################################################"
          cat src/SPC/builder/linux/library/openssl.php
-         echo "############################################################################"
+         ############################################################################
          echo "<?php
 
          declare(strict_types=1);
@@ -144,13 +144,9 @@ jobs:
           FileSystem::removeDir(BUILD_LIB_PATH . '/icu');
           }
          }" > src/SPC/builder/linux/library/icu.php
-
-         echo "############################################################################"
-         cat src/SPC/builder/linux/library/icu.php
-         echo "############################################################################"
-         
+         #############################################################################
          echo "<?php
-
+    
          declare(strict_types=1);
 
          namespace SPC\builder\unix\library;
@@ -190,10 +186,6 @@ jobs:
             ->execWithEnv('make install-exec');
             }
             }" > src/SPC/builder/unix/library/pkgconfig.php
-         echo "############################################################################"
-         cat src/SPC/builder/unix/library/pkgconfig.php
-         echo "############################################################################"
-
 
     - name: spc
       run: |
