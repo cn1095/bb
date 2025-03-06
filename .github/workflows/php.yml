@@ -59,7 +59,7 @@ jobs:
          sed -i '/-D_FILE_OFFSET_BITS=64/d' src/SPC/util/GlobalEnvManager.php
          sed -i 's|/usr/local/musl/{$CFLAGS}-linux-musl/lib| |' src/SPC/util/GlobalEnvManager.php
          
-         sed -i 's/linux-\{\$this->builder->getOption(\x27arch\x27)\}\{\$clang_postfix\}/linux-mips32/' src/SPC/builder/linux/library/openssl.php
+         sed -i 's/linux-{$this->builder->getOption(\'arch\')}{\$clang_postfix}/linux-mips32/' src/SPC/builder/linux/library/openssl.php
          echo "############################################################################"
          cat src/SPC/builder/linux/library/openssl.php
          echo "############################################################################"
