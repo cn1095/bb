@@ -154,7 +154,6 @@ jobs:
          echo "FileSystem::removeDir(BUILD_LIB_PATH . '/icu');" >> src/SPC/builder/linux/library/icu.php
          echo "}" >> src/SPC/builder/linux/library/icu.php
          echo "}" >> src/SPC/builder/linux/library/icu.php
-         cat src/SPC/builder/linux/library/icu.php
   
          echo "<?php" > src/SPC/builder/unix/library/pkgconfig.php
          echo "declare(strict_types=1);" >> src/SPC/builder/unix/library/pkgconfig.php
@@ -193,7 +192,6 @@ jobs:
          echo "->execWithEnv('make install-exec');" >> src/SPC/builder/unix/library/pkgconfig.php
          echo "}" >> src/SPC/builder/unix/library/pkgconfig.php
          echo "}" >> src/SPC/builder/unix/library/pkgconfig.php
-         cat src/SPC/builder/unix/library/pkgconfig.php
 
     - name: spc
       run: |
