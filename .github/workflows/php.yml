@@ -59,6 +59,9 @@ jobs:
          sed -i 's|/usr/local/musl/{$CFLAGS}-linux-musl/lib| |' src/SPC/util/GlobalEnvManager.php
          
          sed -i "s|linux-{\$this->builder->getOption('arch')}{\$clang_postfix}|linux-mips32|" src/SPC/builder/linux/library/openssl.php
+
+         sed -i 's|--strip-all| |' src/SPC/builder/linux/LinuxBuilder.php
+         sed -i 's|--best|--lzma --best|' src/SPC/builder/linux/LinuxBuilder.php
          
          ############################################################################
          echo "<?php
