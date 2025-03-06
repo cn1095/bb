@@ -164,7 +164,7 @@ jobs:
          echo "{" >> src/SPC/builder/unix/library/pkgconfig.php
          echo "\$cflags = PHP_OS_FAMILY !== 'Linux' ? \"{\$this->builder->arch_c_flags} -Wimplicit-function-declaration -Wno-int-conversion\" : '';" >> src/SPC/builder/unix/library/pkgconfig.php
          echo "\$ldflags = PHP_OS_FAMILY !== 'Linux' ? '' : '--static';" >> src/SPC/builder/unix/library/pkgconfig.php
-         echo "shell()->cd($this->source_dir)" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "shell()->cd(\$this->source_dir)" >> src/SPC/builder/unix/library/pkgconfig.php
          echo "->setEnv([" >> src/SPC/builder/unix/library/pkgconfig.php
          echo "'CC' => '/usr/bin/gcc'," >> src/SPC/builder/unix/library/pkgconfig.php
          echo "'CXX' => '/usr/bin/g++'," >> src/SPC/builder/unix/library/pkgconfig.php
@@ -172,7 +172,7 @@ jobs:
          echo "'AR' => '/usr/bin/ar', " >> src/SPC/builder/unix/library/pkgconfig.php
          echo "'CFLAGS' => '-static'," >> src/SPC/builder/unix/library/pkgconfig.php
          echo "'LDFLAGS' => '-static'," >> src/SPC/builder/unix/library/pkgconfig.php
-         echo "'LIBS' => $this->getLibExtraLibs()" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'LIBS' => \$this->getLibExtraLibs()" >> src/SPC/builder/unix/library/pkgconfig.php
          echo "])" >> src/SPC/builder/unix/library/pkgconfig.php
          echo "->execWithEnv(" >> src/SPC/builder/unix/library/pkgconfig.php
          echo "'./configure ' ." >> src/SPC/builder/unix/library/pkgconfig.php
