@@ -105,8 +105,8 @@ jobs:
          echo "\$native_ldflags = 'LDFLAGS=\"-static\"';" >> src/SPC/builder/linux/library/icu.php
          echo "shell()->cd(\$this->source_dir . '/source')" >> src/SPC/builder/linux/library/icu.php
          echo "->exec(" >> src/SPC/builder/linux/library/icu.php
-         echo "\"{\$native_cc} {\$native_cxx} {\$native_ld} {\$native_ar} " ." >> src/SPC/builder/linux/library/icu.php
-         echo "\"{\$native_cflags} {\$native_cxxflags} {\$native_ldflags} " ." >> src/SPC/builder/linux/library/icu.php
+         echo "\"{\$native_cc} {\$native_cxx} {\$native_ld} {\$native_ar} \" ." >> src/SPC/builder/linux/library/icu.php
+         echo "\"{\$native_cflags} {\$native_cxxflags} {\$native_ldflags} \" ." >> src/SPC/builder/linux/library/icu.php
          echo "'./runConfigureICU Linux ' ." >> src/SPC/builder/linux/library/icu.php
          echo "'--prefix=' . BUILD_ROOT_PATH . '/native-icu ' ." >> src/SPC/builder/linux/library/icu.php
          echo "'--enable-static ' ." >> src/SPC/builder/linux/library/icu.php
