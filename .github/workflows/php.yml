@@ -17,7 +17,6 @@ on:
           - "8.2"
           - "8.1"
           - "8.0"
-          - "7.4"
       option:
         description: '编译php集成的模块（https://static-php.dev/zh/guide/cli-generator.html）'
         required: true
@@ -72,17 +71,20 @@ jobs:
          sed -i '/\[global\]/i SPC_LINUX_DEFAULT_CXX=mipsel-linux-muslsf-g++' config/env.ini
          sed -i '/\[global\]/i SPC_LINUX_DEFAULT_AR=mipsel-linux-muslsf-ar' config/env.ini
          sed -i '/\[global\]/i SPC_PHP_DEFAULT_OPTIMIZE_CFLAGS="${CFLAGS}"' config/env.ini
-         sed -i '/\[global\]/i SPC_PHP_DEFAULT_LD_LIBRARY_PATH_CMD="${LD_LIBRARY_PATH}"' config/env.ini
+         sed -i '/\[global\]/i SPC_PHP_DEFAULT_LD_LIBRARY_PATH_CMD="${LD_LIBRARY_PATH} ${CFLAGS}"' config/env.ini
          sed -i 's/CC=\${SPC_LINUX_DEFAULT_CC}/CC=mipsel-linux-muslsf-gcc/' config/env.ini
          sed -i 's/CXX=\${SPC_LINUX_DEFAULT_CXX}/CC=mipsel-linux-muslsf-g++/' config/env.ini
          sed -i 's/AR=\${SPC_LINUX_DEFAULT_AR}/CC=mipsel-linux-muslsf-ar/' config/env.ini
          sed -i 's/LD=ld.gold/LD=mipsel-linux-muslsf-ld/' config/env.ini
+         sed -i 's/${SPC_DEFAULT_C_FLAGS}/${SPC_DEFAULT_C_FLAGS} ${CFLAGS}/' config/env.ini
+         sed -i 's/-I${BUILD_INCLUDE_PATH}/-I${BUILD_INCLUDE_PATH} ${CXXFLAGS}/' config/env.ini
+         sed -i 's/-L${BUILD_LIB_PATH}/-L${BUILD_LIB_PATH} ${CFLAGS}/' config/env.ini
          
          sed -i 's/{$arch}-linux-musl-gcc/mipsel-linux-muslsf-gcc/' src/SPC/util/GlobalEnvManager.php
          sed -i 's/{$arch}-linux-musl-g++/mipsel-linux-muslsf-g++/' src/SPC/util/GlobalEnvManager.php
          sed -i 's/{$arch}-linux-musl-ar/mipsel-linux-muslsf-ar/' src/SPC/util/GlobalEnvManager.php
          sed -i '/-D_FILE_OFFSET_BITS=64/d' src/SPC/util/GlobalEnvManager.php
-         sed -i 's|/usr/local/musl/{$CFLAGS}-linux-musl/lib| |' src/SPC/util/GlobalEnvManager.php
+         sed -i 's|/usr/local/musl/{$arch}-linux-musl/lib| |' src/SPC/util/GlobalEnvManager.php
          
          sed -i "s|linux-{\$this->builder->getOption('arch')}{\$clang_postfix}|linux-mips32|" src/SPC/builder/linux/library/openssl.php
          
