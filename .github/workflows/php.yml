@@ -1,8 +1,39 @@
-name: php
+name: php-mipsel
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: '编译crazywhalecc/static-php-cli源码的分支或版本号，默认主分支main'
+        required: true
+        default: 'main'
+      upx:
+        description: '是否使用upx压缩二进制程序'
+        required: true
+        default: false
+        type: boolean
+      tag:
+        description: '请选择php版本'
+        required: true
+        type: choice
+        default: '8.2'
+        options:
+          - 8.4
+          - 8.3
+          - 8.2
+          - 8.1
+          - 8.0
+          - 7.4
+      option:
+        description: '编译php集成的模块（https://static-php.dev/zh/guide/cli-generator.html）'
+        required: true
+        default: 'apcu,bcmath,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,gd,iconv,intl,openssl,mbregex,mbstring,mysqli,mysqlnd,opcache,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,ssh2,simdjson,simplexml,sockets,sodium,sqlite3,tokenizer,uuid,uv,xml,xmlreader,xmlwriter,xsl,yaml,zip,zlib'
 env:
   TZ: Asia/Shanghai
+  tag: "${{ github.event.inputs.tag }}"
+  upx: "${{ github.event.inputs.upx }}"
+  option: "${{ github.event.inputs.option }}"
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -11,7 +42,8 @@ jobs:
       uses: actions/checkout@v4
       with:
        repository: crazywhalecc/static-php-cli
-    - name: 下载gcc
+       ref: ${{ github.event.inputs.branch }}
+    - name: musl-gcc
       uses: lmq8267/dl-musl@main
       with:
         target: mipsel-linux-muslsf
@@ -60,133 +92,114 @@ jobs:
          
          sed -i "s|linux-{\$this->builder->getOption('arch')}{\$clang_postfix}|linux-mips32|" src/SPC/builder/linux/library/openssl.php
 
-         sed -i 's|--strip-all| |' src/SPC/builder/linux/LinuxBuilder.php
          sed -i 's|--best|--lzma --best|' src/SPC/builder/linux/LinuxBuilder.php
          
-         ############################################################################
-         echo "<?php
-
-         declare(strict_types=1);
-
-         namespace SPC\builder\linux\library;
-
-         use SPC\store\FileSystem;
-
-         class icu extends LinuxLibraryBase
-         {
-          use \SPC\builder\unix\library\icu;
-
-          public const NAME = 'icu';
-
-          protected function build(): void
-          {
-          // 本机编译环境
-          \$native_cc = 'CC=gcc';
-          \$native_cxx = 'CXX=g++';
-          \$native_ld = 'LD=ld.gold';
-          \$native_ar = 'AR=ar';
-          \$native_cflags = 'CFLAGS=\"-O2 -fPIC\"';
-          \$native_cxxflags = 'CXXFLAGS=\"-O2 -fPIC -std=c++17\"';
-          \$native_ldflags = 'LDFLAGS=\"-static\"';
-        
-          // 进入 ICU 源码目录并进行本机编译
-          shell()->cd(\$this->source_dir . '/source')
-            ->exec(
-                \"\${native_cc} \${native_cxx} \${native_ld} \${native_ar} \" .
-                \"\${native_cflags} \${native_cxxflags} \${native_ldflags} \" .
-                './runConfigureICU Linux ' .
-                '--prefix=' . BUILD_ROOT_PATH . '/native-icu ' .
-                '--enable-static ' .
-                '--disable-shared ' .
-                '--with-data-packaging=static ' .
-                '--enable-release=yes ' .
-                '--enable-extras=no ' .
-                '--enable-icuio=yes ' .
-                '--enable-dyload=no ' .
-                '--enable-tools=yes ' .
-                '--enable-tests=no ' .
-                '--enable-samples=no'
-            )
-            ->exec('make clean')
-            ->exec(\"make -j\\\${this->builder->concurrency}\")
-            ->exec('make install')
-            ->exec('ls')
-            ->exec('cp -r bin ' . BUILD_ROOT_PATH . '/native-icu')
-            ->exec('cp -r config ' . BUILD_ROOT_PATH . '/native-icu');
-        
-          // 交叉编译环境
-          \$cppflags = 'CPPFLAGS=\"-DU_CHARSET_IS_UTF8=1  -DU_USING_ICU_NAMESPACE=1 -DU_STATIC_IMPLEMENTATION=1\"';
-          \$cxxflags = 'CXXFLAGS=\"-std=c++17\"';
-          \$ldflags = 'LDFLAGS=\"-static\"';
-
-          shell()->cd(\$this->source_dir . '/source')
-            ->exec(
-                \"\${cppflags} \${cxxflags} \${ldflags} \" .
-                './runConfigureICU Linux ' .
-                '--host=mipsel-linux-muslsf ' .
-                '--enable-static ' .
-                '--disable-shared ' .
-                '--with-data-packaging=static ' .
-                '--enable-release=yes ' .
-                '--enable-extras=no ' .
-                '--enable-icuio=yes ' .
-                '--enable-dyload=no ' .
-                '--enable-tools=yes ' .
-                '--enable-tests=no ' .
-                '--enable-samples=no ' .
-                '--prefix=' . BUILD_ROOT_PATH . ' ' .
-                '--with-cross-build=' . BUILD_ROOT_PATH . '/native-icu'
-            )
-            ->exec('make clean')
-            ->exec(\"make -j\\\${this->builder->concurrency}\")
-            ->exec('make install');
-
-          \$this->patchPkgconfPrefix(['icu-i18n.pc', 'icu-io.pc', 'icu-uc.pc'], PKGCONF_PATCH_PREFIX);
-          FileSystem::removeDir(BUILD_LIB_PATH . '/icu');
-          }
-         }" > src/SPC/builder/linux/library/icu.php
-         #############################################################################
-         echo "<?php
-    
-         declare(strict_types=1);
-
-         namespace SPC\builder\unix\library;
-
-         trait pkgconfig
-         {
-          protected function build(): void
-          {
-            \$cflags = PHP_OS_FAMILY !== 'Linux' ? \"{\$this->builder->arch_c_flags} -Wimplicit-function-declaration -Wno-int-conversion\" : '';
-            \$ldflags = PHP_OS_FAMILY !== 'Linux' ? '' : '--static';
-
-            shell()->cd(\$this->source_dir)
-            ->setEnv([
-                'CC' => '/usr/bin/gcc',  // 强制使用系统 GCC
-                'CXX' => '/usr/bin/g++', // 强制使用系统 G++
-                'LD' => '/usr/bin/ld.gold',   // 强制使用系统 LD
-                'AR' => '/usr/bin/ar',   // 强制使用系统 AR
-                'CFLAGS' => '-static',
-                'LDFLAGS' => '-static',
-                'LIBS' => \$this->getLibExtraLibs()
-            ])
-            ->execWithEnv(
-                './configure ' .
-                '--disable-shared ' .
-                '--enable-static ' .
-                '--with-internal-glib ' .
-                '--disable-host-tool ' .
-                '--with-pic ' .
-                '--prefix=' . BUILD_ROOT_PATH . ' ' .
-                '--without-sysroot ' .
-                '--without-system-include-path ' .
-                '--without-system-library-path ' .
-                '--without-pc-path'
-            )
-            ->exec('make clean')
-            ->execWithEnv(\"make -j{\$this->builder->concurrency}\")
-            ->execWithEnv('make install-exec');
-            }
-            }" > src/SPC/builder/unix/library/pkgconfig.php
+         echo "<?php" > src/SPC/builder/linux/library/icu.php
+         echo "declare(strict_types=1);" >> src/SPC/builder/linux/library/icu.php
+         echo "namespace SPC\builder\linux\library;" >> src/SPC/builder/linux/library/icu.php
+         echo "use SPC\store\FileSystem;" >> src/SPC/builder/linux/library/icu.php
+         echo "class icu extends LinuxLibraryBase" >> src/SPC/builder/linux/library/icu.php
+         echo "{" >> src/SPC/builder/linux/library/icu.php
+         echo "use \SPC\builder\unix\library\icu;" >> src/SPC/builder/linux/library/icu.php
+         echo "public const NAME = 'icu';" >> src/SPC/builder/linux/library/icu.php
+         echo "protected function build(): void" >> src/SPC/builder/linux/library/icu.php
+         echo "{" >> src/SPC/builder/linux/library/icu.php
+         echo "\$native_cc = 'CC=gcc';" >> src/SPC/builder/linux/library/icu.php
+         echo "\$native_cxx = 'CXX=g++';" >> src/SPC/builder/linux/library/icu.php
+         echo "\$native_ld = 'LD=ld.gold';" >> src/SPC/builder/linux/library/icu.php
+         echo "\$native_ar = 'AR=ar';" >> src/SPC/builder/linux/library/icu.php
+         echo "\$native_cflags = 'CFLAGS=\"-O2 -fPIC\"';" >> src/SPC/builder/linux/library/icu.php
+         echo "\$native_cxxflags = 'CXXFLAGS=\"-O2 -fPIC -std=c++17\"';" >> src/SPC/builder/linux/library/icu.php
+         echo "\$native_ldflags = 'LDFLAGS=\"-static\"';" >> src/SPC/builder/linux/library/icu.php
+         echo "shell()->cd(\$this->source_dir . '/source')" >> src/SPC/builder/linux/library/icu.php
+         echo "->exec(" >> src/SPC/builder/linux/library/icu.php
+         echo "\"{\$native_cc} {\$native_cxx} {\$native_ld} {\$native_ar} " ." >> src/SPC/builder/linux/library/icu.php
+         echo "\"{\$native_cflags} {\$native_cxxflags} {\$native_ldflags} " ." >> src/SPC/builder/linux/library/icu.php
+         echo "'./runConfigureICU Linux ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--prefix=' . BUILD_ROOT_PATH . '/native-icu ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--enable-static ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--disable-shared ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--with-data-packaging=static ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--enable-release=yes ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--enable-extras=no ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--enable-icuio=yes ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--enable-dyload=no ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--enable-tools=yes ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--enable-tests=no ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--enable-samples=no'" >> src/SPC/builder/linux/library/icu.php
+         echo ")" >> src/SPC/builder/linux/library/icu.php
+         echo "->exec('make clean')" >> src/SPC/builder/linux/library/icu.php
+         echo "->exec(\"make -j{\$this->builder->concurrency}\")" >> src/SPC/builder/linux/library/icu.php
+         echo "->exec('make install')" >> src/SPC/builder/linux/library/icu.php
+         echo "->exec('ls')" >> src/SPC/builder/linux/library/icu.php
+         echo "->exec('cp -r bin ' . BUILD_ROOT_PATH . '/native-icu')" >> src/SPC/builder/linux/library/icu.php
+         echo "->exec('cp -r config ' . BUILD_ROOT_PATH . '/native-icu');" >> src/SPC/builder/linux/library/icu.php
+         echo "\$cppflags = 'CPPFLAGS=\"-DU_CHARSET_IS_UTF8=1  -DU_USING_ICU_NAMESPACE=1 -DU_STATIC_IMPLEMENTATION=1\"';" >> src/SPC/builder/linux/library/icu.php
+         echo "\$cxxflags = 'CXXFLAGS=\"-std=c++17\"';" >> src/SPC/builder/linux/library/icu.php
+         echo "\$ldflags = 'LDFLAGS=\"-static\"';" >> src/SPC/builder/linux/library/icu.php
+         echo "shell()->cd(\$this->source_dir . '/source')" >> src/SPC/builder/linux/library/icu.php
+         echo "->exec(" >> src/SPC/builder/linux/library/icu.php
+         echo "\"{\$cppflags} {\$cxxflags} {\$ldflags} \" ." >> src/SPC/builder/linux/library/icu.php
+         echo "'./runConfigureICU Linux ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--host=mipsel-linux-muslsf ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--enable-static ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--disable-shared ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--with-data-packaging=static ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--enable-release=yes ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--enable-extras=no ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--enable-icuio=yes ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--enable-dyload=no ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--enable-tools=yes ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--enable-tests=no ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--enable-samples=no ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--prefix=' . BUILD_ROOT_PATH . ' ' ." >> src/SPC/builder/linux/library/icu.php
+         echo "'--with-cross-build=' . BUILD_ROOT_PATH . '/native-icu'" >> src/SPC/builder/linux/library/icu.php
+         echo ")" >> src/SPC/builder/linux/library/icu.php
+         echo "->exec('make clean')" >> src/SPC/builder/linux/library/icu.php
+         echo "->exec(\"make -j{\$this->builder->concurrency}\")" >> src/SPC/builder/linux/library/icu.php
+         echo "->exec('make install');" >> src/SPC/builder/linux/library/icu.php
+         echo "\$this->patchPkgconfPrefix(['icu-i18n.pc', 'icu-io.pc', 'icu-uc.pc'], PKGCONF_PATCH_PREFIX);" >> src/SPC/builder/linux/library/icu.php
+         echo "FileSystem::removeDir(BUILD_LIB_PATH . '/icu');" >> src/SPC/builder/linux/library/icu.php
+         echo "}" >> src/SPC/builder/linux/library/icu.php
+         echo "}" >> src/SPC/builder/linux/library/icu.php
+  
+         echo "<?php" > src/SPC/builder/unix/library/pkgconfig.php
+         echo "declare(strict_types=1);" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "namespace SPC\builder\unix\library;" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "trait pkgconfig" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "{" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "protected function build(): void" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "{" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "\$cflags = PHP_OS_FAMILY !== 'Linux' ? \"{\$this->builder->arch_c_flags} -Wimplicit-function-declaration -Wno-int-conversion\" : '';" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "\$ldflags = PHP_OS_FAMILY !== 'Linux' ? '' : '--static';" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "shell()->cd($this->source_dir)" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "->setEnv([" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'CC' => '/usr/bin/gcc'," >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'CXX' => '/usr/bin/g++'," >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'LD' => '/usr/bin/ld.gold'," >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'AR' => '/usr/bin/ar', " >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'CFLAGS' => '-static'," >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'LDFLAGS' => '-static'," >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'LIBS' => $this->getLibExtraLibs()" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "])" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "->execWithEnv(" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'./configure ' ." >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'--disable-shared ' ." >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'--enable-static ' ." >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'--with-internal-glib ' ." >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'--disable-host-tool ' ." >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'--with-pic ' ." >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'--prefix=' . BUILD_ROOT_PATH . ' ' ." >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'--without-sysroot ' ." >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'--without-system-include-path ' ." >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'--without-system-library-path ' ." >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "'--without-pc-path'" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo ")" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "->exec('make clean')" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "->execWithEnv(\"make -j{\$this->builder->concurrency}\")" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "->execWithEnv('make install-exec');" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "}" >> src/SPC/builder/unix/library/pkgconfig.php
+         echo "}" >> src/SPC/builder/unix/library/pkgconfig.php
 
     - name: spc
       run: |
@@ -207,8 +220,11 @@ jobs:
          sudo update-binfmts --enable qemu-mipsel
          sudo cp -rf $STRIP $(which strip)
          export QEMU_BINARY=qemu-mipsel
-         bin/spc download --with-php=8.2 --for-extensions "apcu,bcmath,calendar,ctype,curl,dba,dom,event,exif,fileinfo,openssl,filter,gd,iconv,intl,mbregex,mbstring,mysqli,mysqlnd,opcache,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,simdjson,simplexml,sockets,sodium,sqlite3,tokenizer,uuid,uv,xml,xmlreader,xmlwriter,xsl,yaml,zip,zlib"
-         bin/spc install-pkg upx
+         
+         bin/spc download --with-php=${{ env.option }} --for-extensions "${{ env.option }}"
+         if [[ "${{ env.upx }}" = "true" ]] ; then
+           bin/spc install-pkg upx
+         fi
          
     - name: build
       run: |
@@ -218,12 +234,39 @@ jobs:
          export SPC_LINUX_DEFAULT_AR=mipsel-linux-muslsf-ar
          export SPC_PHP_DEFAULT_OPTIMIZE_CFLAGS="${CFLAGS}"
          export SPC_PHP_DEFAULT_LD_LIBRARY_PATH_CMD="${LD_LIBRARY_PATH}"
-         
-         bin/spc build --build-cli --build-fpm "apcu,bcmath,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,gd,iconv,intl,openssl,mbregex,mbstring,mysqli,mysqlnd,opcache,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,simdjson,simplexml,sockets,sodium,sqlite3,tokenizer,uuid,uv,xml,xmlreader,xmlwriter,xsl,yaml,zip,zlib" --with-libs="libjpeg" --with-upx-pack --debug
+
+         if [[ "${{ env.upx }}" = "true" ]] ; then
+           php_upx="--with-upx-pack"
+         fi
+         bin/spc build --build-cli --build-fpm "${{ env.option }}" --with-libs="libjpeg" $php_upx --debug
          ls buildroot/bin
          file buildroot/bin/php || true
-   
+         echo "build_time=$(date '+%Y年%m月%d日%H:%M:%S' | jq -sRr @uri)" >> $GITHUB_ENV
+         
     - uses: actions/upload-artifact@v4
       with:
-        name: php
+        name: php-mipsel
         path: buildroot/bin
+        
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        body: |
+          > ### ![](https://img.shields.io/badge/%E7%BC%96%E8%AF%91%E6%97%B6%E9%97%B4-${{ env.build_time }}-8267?logo=github&labelColor=%E9%A1%BB)![](https://img.shields.io/github/downloads/${{ github.repository }}/${{ env.tag }}/total?label=%E4%B8%8B%E8%BD%BD%E6%AC%A1%E6%95%B0&logo=github)
+           
+          [提交记录](https://github.com/crazywhalecc/static-php-cli/tree/${{ env.haxi }})
+
+          集成的模块：
+          ```
+          ${{ env.option }}
+          ```
+          
+          [官方源码](https://github.com/crazywhalecc/static-php-cli)
+           
+        tag_name: ${{ env.tag }}
+        files: |
+          buildroot/bin/php
+          buildroot/bin/php-fpm
+          buildroot/etc/php-fpm.conf.default
+          buildroot/etc/php-fpm.d/www.conf.default
