@@ -83,7 +83,7 @@ jobs:
          sed -i 's/{$arch}-linux-musl-gcc/mipsel-linux-muslsf-gcc/' src/SPC/util/GlobalEnvManager.php
          sed -i 's/{$arch}-linux-musl-g++/mipsel-linux-muslsf-g++/' src/SPC/util/GlobalEnvManager.php
          sed -i 's/{$arch}-linux-musl-ar/mipsel-linux-muslsf-ar/' src/SPC/util/GlobalEnvManager.php
-         sed -i '/-D_FILE_OFFSET_BITS=64/ /' src/SPC/util/GlobalEnvManager.php
+         sed -i 's/-D_FILE_OFFSET_BITS=64/ /' src/SPC/util/GlobalEnvManager.php
          sed -i 's|/usr/local/musl/{$arch}-linux-musl/lib| |' src/SPC/util/GlobalEnvManager.php
          
          sed -i "s|linux-{\$this->builder->getOption('arch')}{\$clang_postfix}|linux-mips32|" src/SPC/builder/linux/library/openssl.php
