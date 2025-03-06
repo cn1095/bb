@@ -10,8 +10,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       with:
-       repository: cn1095/static-php-cli
-       ref: main
+       repository: crazywhalecc/static-php-cli
     - name: 下载gcc
       uses: lmq8267/dl-musl@main
       with:
