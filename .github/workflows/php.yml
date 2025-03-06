@@ -50,6 +50,7 @@ jobs:
          
          bin/spc build --build-all "apcu,bcmath,calendar,ctype,curl,dba,dom,exif,fileinfo,filter,gd,iconv,intl,openssl,mbregex,mbstring,mysqli,mysqlnd,opcache,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,simplexml,sockets,sodium,sqlite3,tokenizer,uuid,uv,xml,xmlreader,xmlwriter,xsl,zip,zlib" --with-upx-pack --debug --build-all
          ls buildroot/bin
+         file buildroot/bin/php || true
    
     - uses: actions/upload-artifact@v4
       with:
