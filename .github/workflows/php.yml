@@ -18,6 +18,47 @@ jobs:
         target: mipsel-linux-muslsf
         static: true
         gccpath: /tmp
+    - name: sed
+      run: |
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/xz.php
+         sed -i 's/configure/configure --host=mipsel-linux-muslsf/g' src/SPC/builder/unix/library/libcares.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/freetype.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/gettext.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/gmp.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/imagemagick.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/ldap.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/libiconv.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/librdkafka.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/libsodium.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/libtiff.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/libxslt.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/ncurses.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/nghttp2.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/onig.php
+         sed -i 's/configure/configure --host=mipsel-linux-muslsf/' src/SPC/builder/unix/library/postgresql.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/qdbm.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/readline.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/sqlite.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/unixodbc.php
+         sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/'
+
+         sed -i 's/configure/configure --host=mipsel-linux-muslsf/' src/SPC/builder/unix/library/zlib.php
+         sed -i 's/--prefix=/--host=mipsel-linux-muslsf --prefix=/' config/env.ini
+         sed -i '/\[global\]/i SPC_LINUX_DEFAULT_CC=mipsel-linux-muslsf-gcc' config/env.ini
+         sed -i '/\[global\]/i SPC_LINUX_DEFAULT_CXX=mipsel-linux-muslsf-g++' config/env.ini
+         sed -i '/\[global\]/i SPC_LINUX_DEFAULT_AR=mipsel-linux-muslsf-ar' config/env.ini
+         sed -i '/\[global\]/i SPC_PHP_DEFAULT_OPTIMIZE_CFLAGS="${CFLAGS}"' config/env.ini
+         sed -i '/\[global\]/i SPC_PHP_DEFAULT_LD_LIBRARY_PATH_CMD="${LD_LIBRARY_PATH}"' config/env.ini
+         sed -i 's/CC=\${SPC_LINUX_DEFAULT_CC}/CC=mipsel-linux-muslsf-gcc/' config/env.ini
+         sed -i 's/CXX=\${SPC_LINUX_DEFAULT_CC}/CC=mipsel-linux-muslsf-g++/' config/env.ini
+         sed -i 's/AR=\${SPC_LINUX_DEFAULT_CC}/CC=mipsel-linux-muslsf-ar/' config/env.ini
+         sed -i 's/LD=ld.gold/LD=mipsel-linux-muslsf-ld/' config/env.ini
+         sed -i 's/\{\$arch\}-linux-musl-gcc/mipsel-linux-muslsf-gcc/' src/SPC/util/GlobalEnvManager.php
+         sed -i 's/\{\$arch\}-linux-musl-g++/mipsel-linux-muslsf-g++/' src/SPC/util/GlobalEnvManager.php
+         sed -i 's/\{\$arch\}-linux-musl-ar/mipsel-linux-muslsf-ar/' src/SPC/util/GlobalEnvManager.php
+         sed -i 's/linux-\{\$this->builder->getOption\(\''\''arch\''\''\)\}\{\$clang_postfix\}/linux-mips32/' src/SPC/builder/linux/library/openssl.php
+
+
     - name: spc
       run: |
          export SPC_LINUX_DEFAULT_CC=mipsel-linux-muslsf-gcc
