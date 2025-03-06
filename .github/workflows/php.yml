@@ -202,7 +202,7 @@ jobs:
 
     - name: download
       run: |
-         sudo apt install qemu-user qemu-user-static binfmt-support libelf-dev 
+         sudo apt install qemu-user qemu-user-static binfmt-support
          sudo update-binfmts --enable qemu-mipsel
          sudo cp -rf $STRIP $(which strip)
          export QEMU_BINARY=qemu-mipsel
