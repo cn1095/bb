@@ -108,7 +108,7 @@ jobs:
                 '--enable-samples=no'
             )
             ->exec('make clean')
-            ->exec(\"make -j\${this->builder->concurrency}\")
+            ->exec(\"make -j\\\${this->builder->concurrency}\")
             ->exec('make install')
             ->exec('ls')
             ->exec('cp -r bin ' . BUILD_ROOT_PATH . '/native-icu')
@@ -138,7 +138,7 @@ jobs:
                 '--with-cross-build=' . BUILD_ROOT_PATH . '/native-icu'
             )
             ->exec('make clean')
-            ->exec(\"make -j\${this->builder->concurrency}\")
+            ->exec(\"make -j\\\${this->builder->concurrency}\")
             ->exec('make install');
 
           \$this->patchPkgconfPrefix(['icu-i18n.pc', 'icu-io.pc', 'icu-uc.pc'], PKGCONF_PATCH_PREFIX);
