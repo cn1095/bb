@@ -240,6 +240,10 @@ jobs:
          cp -r buildroot/bin/php-fpm buildroot/bin/php-fpm_upx
          upx --lzma --best buildroot/bin/php_upx
          upx --lzma --best buildroot/bin/php-fpm_upx
+         echo $(md5sum buildroot/bin/php | awk '{print $1;}') >buildroot/bin/php.MD5
+         echo $(md5sum buildroot/bin/php_upx | awk '{print $1;}') >buildroot/bin/php_upx.MD5
+         echo $(md5sum buildroot/bin/php-fpm | awk '{print $1;}') >buildroot/bin/php-fpm.MD5
+         echo $(md5sum buildroot/bin/php-fpm_upx | awk '{print $1;}') >buildroot/bin/php-fpm_upx.MD5
 
          echo "haxi=$(git rev-parse HEAD)" >> $GITHUB_ENV
          echo "build_time=$(date '+%Y年%m月%d日%H:%M:%S' | jq -sRr @uri)" >> $GITHUB_ENV
@@ -264,14 +268,19 @@ jobs:
           ```
 
           `_upx` 后缀的为压缩后的程序
+          `.MD5` 后缀的为程序的MD5校验值
           
           [官方源码](https://github.com/crazywhalecc/static-php-cli)
            
         tag_name: ${{ env.tag }}
         files: |
           buildroot/bin/php
+          buildroot/bin/php.MD5
           buildroot/bin/php_upx
+          buildroot/bin/php_upx.MD5
           buildroot/bin/php-fpm
+          buildroot/bin/php-fpm.MD5
           buildroot/bin/php-fpm_upx
+          buildroot/bin/php-fpm_upx.MD5
           buildroot/etc/php-fpm.conf.default
           buildroot/etc/php-fpm.d/www.conf.default
