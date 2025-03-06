@@ -20,7 +20,7 @@ jobs:
         gccpath: /tmp
     - name: spc
       run: |
-        
+         sudo apt install -y musl musl-dev musl-tools
          export SPC_LINUX_DEFAULT_CC=mipsel-linux-muslsf-gcc
          export SPC_LINUX_DEFAULT_CXX=mipsel-linux-muslsf-g++
          export SPC_LINUX_DEFAULT_AR=mipsel-linux-muslsf-ar
