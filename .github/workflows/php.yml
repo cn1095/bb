@@ -21,7 +21,7 @@ on:
       option:
         description: '编译php集成的模块（https://static-php.dev/zh/guide/cli-generator.html）'
         required: true
-        default: 'apcu,bcmath,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,gd,iconv,intl,openssl,mbregex,mbstring,mysqli,mysqlnd,opcache,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,ssh2,simdjson,simplexml,sockets,sodium,sqlite3,tokenizer,uuid,uv,xml,xmlreader,xmlwriter,xsl,yaml,zip,zlib'
+        default: "apcu,bcmath,calendar,ctype,curl,dba,dom,event,exif,fileinfo,filter,gd,iconv,intl,openssl,mbregex,mbstring,mysqli,mysqlnd,opcache,pcntl,pdo,pdo_mysql,pdo_pgsql,pdo_sqlite,pgsql,phar,posix,readline,redis,session,ssh2,simdjson,simplexml,sockets,sodium,sqlite3,tokenizer,uuid,uv,xml,xmlreader,xmlwriter,xsl,yaml,zip,zlib"
 env:
   TZ: Asia/Shanghai
   tag: "${{ github.event.inputs.tag }}"
