@@ -29,7 +29,7 @@ env:
 permissions:
   contents: write
 jobs:
-  build:
+  php:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout code
