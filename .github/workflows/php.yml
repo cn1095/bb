@@ -48,22 +48,21 @@ jobs:
          sed -i '/\[global\]/i SPC_LINUX_DEFAULT_AR=mipsel-linux-muslsf-ar' config/env.ini
          sed -i '/\[global\]/i SPC_PHP_DEFAULT_OPTIMIZE_CFLAGS="${CFLAGS}"' config/env.ini
          sed -i '/\[global\]/i SPC_PHP_DEFAULT_LD_LIBRARY_PATH_CMD="${LD_LIBRARY_PATH}"' config/env.ini
-         echo ############################################################################
-         cat config/env.ini
-         echo ############################################################################
          sed -i 's/CC=\${SPC_LINUX_DEFAULT_CC}/CC=mipsel-linux-muslsf-gcc/' config/env.ini
          sed -i 's/CXX=\${SPC_LINUX_DEFAULT_CC}/CC=mipsel-linux-muslsf-g++/' config/env.ini
          sed -i 's/AR=\${SPC_LINUX_DEFAULT_CC}/CC=mipsel-linux-muslsf-ar/' config/env.ini
-         echo 88888888888
          sed -i 's/LD=ld.gold/LD=mipsel-linux-muslsf-ld/' config/env.ini
-         sed -i 's/\{\$arch\}-linux-musl-gcc/mipsel-linux-muslsf-gcc/' src/SPC/util/GlobalEnvManager.php
-         sed -i 's/\{\$arch\}-linux-musl-g++/mipsel-linux-muslsf-g++/' src/SPC/util/GlobalEnvManager.php
-         sed -i 's/\{\$arch\}-linux-musl-ar/mipsel-linux-muslsf-ar/' src/SPC/util/GlobalEnvManager.php
-         echo 444444444
+         echo "############################################################################"
+         cat config/env.ini
+         echo "############################################################################"
+         sed -i 's/{$arch}-linux-musl-gcc/mipsel-linux-muslsf-gcc/' src/SPC/util/GlobalEnvManager.php
+         sed -i 's/{$arch}-linux-musl-g++/mipsel-linux-muslsf-g++/' src/SPC/util/GlobalEnvManager.php
+         sed -i 's/{$arch}-linux-musl-ar/mipsel-linux-muslsf-ar/' src/SPC/util/GlobalEnvManager.php
          sed -i '/-D_FILE_OFFSET_BITS=64/d' src/SPC/util/GlobalEnvManager.php
-         echo ssss
-         sed -i '/\/usr\/local\/musl\/\{\$CFLAGS\}-linux-musl\/lib/d' src/SPC/util/GlobalEnvManager.php
-         echo sdsdsd
+         sed -i '|/usr/local/musl/{$CFLAGS}-linux-musl/lib|d' src/SPC/util/GlobalEnvManager.php
+         echo "############################################################################"
+         cat src/SPC/util/GlobalEnvManager.php
+         echo "############################################################################"
          sed -i 's/linux-\{\$this->builder->getOption\(\''\''arch\''\''\)\}\{\$clang_postfix\}/linux-mips32/' src/SPC/builder/linux/library/openssl.php
          echo sdddddddddddd
          echo "<?php
