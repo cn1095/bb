@@ -41,7 +41,6 @@ jobs:
          sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/unix/library/unixodbc.php
          sed -i 's/--enable-static/--host=mipsel-linux-muslsf --enable-static/' src/SPC/builder/linux/library/libpng.php
 
-         sed -i 's/configure/configure --host=mipsel-linux-muslsf/' src/SPC/builder/unix/library/zlib.php
          sed -i 's/--prefix=/--build=x86_64 --host=mipsel-linux-muslsf --prefix=/' config/env.ini
          sed -i '/\[global\]/i SPC_LINUX_DEFAULT_CC=mipsel-linux-muslsf-gcc' config/env.ini
          sed -i '/\[global\]/i SPC_LINUX_DEFAULT_CXX=mipsel-linux-muslsf-g++' config/env.ini
