@@ -34,6 +34,7 @@ jobs:
           tar -xJf /opt/musl_gcc/*.tar.xz -C /opt/musl_gcc --strip-components=1
           sudo ln -s /opt/musl_gcc/toolchain-*/bin/*gcc /usr/bin/
           echo "PATH=$PATH:$(echo /opt/musl_gcc/toolchain-*/bin)" >> $GITHUB_ENV
+          echo "STAGING_DIR=$(echo /opt/musl_gcc/toolchain-*)" >> $GITHUB_ENV
            
           cd /opt/musl_gcc/toolchain-*/lib/gcc/mipsel-openwrt-linux-musl/12.3.0 || exit 255
           cp libgcc_eh.a libunwind.a
@@ -51,7 +52,8 @@ jobs:
           cat >>~/.cargo/config <<EOF
           [target.mipsel-unknown-linux-musl]
           linker = "mipsel-openwrt-linux-musl-gcc"
-          rustflags = ["-L", "/opt/musl_gcc/toolchain-mipsel_24kc_gcc-12.3.0_musl/lib",
+          rustflags = ["-C", "opt-level=z", "-C", "strip=symbols", "-C", "lto=fat", "-C", "codegen-units=1",
+          "-L", "/opt/musl_gcc/toolchain-mipsel_24kc_gcc-12.3.0_musl/lib",
           "-L", "/opt/musl_gcc/toolchain-mipsel_24kc_gcc-12.3.0_musl/lib/gcc/mipsel-openwrt-linux-musl/12.3.0"]
           EOF
       - name: 开始编译
@@ -62,7 +64,7 @@ jobs:
           cargo +nightly build -r --target mipsel-unknown-linux-musl -Z build-std=std,panic_abort --no-default-features $FEATURES
           mkdir -p /opt/bin
           mv ./target/mipsel-unknown-linux-musl/release/easytier-core /opt/bin/easytier-core
-      - name: Install UPX
+      - name: 安装UPX
         uses: crazy-max/ghaction-upx@v3
         with:
           version: latest
