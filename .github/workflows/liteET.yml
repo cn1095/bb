@@ -28,7 +28,7 @@ jobs:
           rustup set auto-self-update disable
           rustup install 1.84
           rustup default 1.84
-          MUSL_URI="https://downloads.openwrt.org/releases/23.05.4/targets/ramips/mt7621/openwrt-toolchain-23.05.4-ramips-mt7621_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+          MUSL_URI="https://archive.openwrt.org/releases/23.05.4/targets/mediatek/filogic/openwrt-toolchain-23.05.4-mediatek-filogic_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
           mkdir -p /opt/musl_gcc
           wget -q -c $MUSL_URI -P /opt/musl_gcc/
           tar -xJf /opt/musl_gcc/*.tar.xz -C /opt/musl_gcc --strip-components=1
@@ -36,35 +36,20 @@ jobs:
           sudo ln -s /opt/musl_gcc/toolchain-*/include/ /usr/include/musl-cross
           echo "PATH=$PATH:$(echo /opt/musl_gcc/toolchain-*/bin)" >> $GITHUB_ENV
           echo "STAGING_DIR=$(echo /opt/musl_gcc/toolchain-*)" >> $GITHUB_ENV
-           
-          cd /opt/musl_gcc/toolchain-*/lib/gcc/mipsel-openwrt-linux-musl/12.3.0 || exit 255
-          cp libgcc_eh.a libunwind.a
-          ar x libgcc.a _ctzsi2.o _clz.o _bswapsi2.o
-          ar rcs libctz.a _ctzsi2.o _clz.o _bswapsi2.o
-
-          rustup toolchain install nightly-x86_64-unknown-linux-gnu
-          rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
-          # https://github.com/rust-lang/rust/issues/128808
-          # remove it after Cargo or rustc fix this.
-          RUST_LIB_SRC=$HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/
-          if [[ -f $RUST_LIB_SRC/library/Cargo.lock && ! -f $RUST_LIB_SRC/Cargo.lock ]]; then 
-              cp -f $RUST_LIB_SRC/library/Cargo.lock $RUST_LIB_SRC/Cargo.lock
-          fi
+          rustup target add aarch64-unknown-linux-musl
           cat >>~/.cargo/config <<EOF
-          [target.mipsel-unknown-linux-musl]
-          linker = "mipsel-openwrt-linux-musl-gcc"
-          rustflags = ["-C", "opt-level=z", "-C", "strip=symbols", 
-          "-L", "/opt/musl_gcc/toolchain-mipsel_24kc_gcc-12.3.0_musl/lib",
-          "-L", "/opt/musl_gcc/toolchain-mipsel_24kc_gcc-12.3.0_musl/lib/gcc/mipsel-openwrt-linux-musl/12.3.0"]
+          [target.aarch64-unknown-linux-musl]
+          linker = "aarch64-openwrt-linux-musl-gcc"
+          rustflags = ["-C", "opt-level=z", "-C", "strip=symbols"]
           EOF
       - name: 开始编译
         run: |
           [[ -n $feature ]] && echo "当前添加的模块有 ${feature}" && FEATURES="--features ${feature}"
           export KCP_SYS_EXTRA_HEADER_PATH=/usr/include/musl-cross
           rm -rf .cargo
-          cargo +nightly build -p easytier -r --target mipsel-unknown-linux-musl -Z build-std=std,panic_abort --no-default-features $FEATURES
+          cargo build -p easytier -r --target aarch64-unknown-linux-musl --no-default-features $FEATURES
           mkdir -p /opt/bin
-          mv ./target/mipsel-unknown-linux-musl/release/easytier-core /opt/bin/easytier-core
+          mv ./target/aarch64-unknown-linux-musl/release/easytier-core /opt/bin/easytier-core
       - name: 安装UPX
         uses: crazy-max/ghaction-upx@v3
         with:
@@ -75,7 +60,7 @@ jobs:
         run: |
           cd /opt/bin
           ls -alh easytier-core
-          mipsel-openwrt-linux-strip easytier-core
+          aarch64-openwrt-linux-strip easytier-core
           upx --lzma --best easytier-core
           ls -alh easytier-core
       - name: 上传
