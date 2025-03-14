@@ -34,8 +34,8 @@ jobs:
           tar -xJvf /opt/musl_gcc/*.tar.xz -C /opt/musl_gcc --strip-components=1
           sudo ln -s /opt/musl_gcc/toolchain-*/bin/*gcc /usr/bin/
           echo "PATH=$PATH:$(echo /opt/musl_gcc/toolchain-*/bin)" >> $GITHUB_ENV
-            
-          cd /opt/musl_gcc/toolchain-*/lib/gcc/${{ env.URL }}/12.3.0 || exit 255
+           
+          cd /opt/musl_gcc/toolchain-*/lib/gcc/mipsel-openwrt-linux-musl/12.3.0 || exit 255
           cp libgcc_eh.a libunwind.a
           ar x libgcc.a _ctzsi2.o _clz.o _bswapsi2.o
           ar rcs libctz.a _ctzsi2.o _clz.o _bswapsi2.o
