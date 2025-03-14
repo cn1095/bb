@@ -1,0 +1,82 @@
+name: 小et
+
+on:
+  workflow_dispatch:
+    inputs:
+      feature:
+        description: '按需添加想要的模块，多个模块以,分隔'
+        required: false
+        default: ''
+
+env:
+  CARGO_TERM_COLOR: always
+  TZ: Asia/Shanghai
+  feature: "${{ github.event.inputs.feature }}"
+jobs:
+ build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: EasyTier/EasyTier
+      - name: 安装最新 Protoc
+        uses: arduino/setup-protoc@v3
+      - name: 设置编译环境
+        run: |
+          sudo timedatectl set-timezone "Asia/Shanghai"
+          sudo apt-get update && sudo apt-get install -qq musl-tools libappindicator3-dev llvm clang
+          rustup set auto-self-update disable
+          rustup install 1.84
+          rustup default 1.84
+          MUSL_URI="https://downloads.openwrt.org/releases/23.05.4/targets/ramips/mt7621/openwrt-toolchain-23.05.4-ramips-mt7621_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
+          mkdir -p /opt/musl_gcc
+          wget -q -c $MUSL_URI -P /opt/musl_gcc/
+          tar -xJvf /opt/musl_gcc/*.tar.xz -C /opt/musl_gcc --strip-components=1
+          sudo ln -s /opt/musl_gcc/toolchain-*/bin/*gcc /usr/bin/
+          echo "PATH=$PATH:$(echo /opt/musl_gcc/toolchain-*/bin)" >> $GITHUB_ENV
+            
+          cd /opt/musl_gcc/toolchain-*/lib/gcc/${{ env.URL }}/12.3.0 || exit 255
+          cp libgcc_eh.a libunwind.a
+          ar x libgcc.a _ctzsi2.o _clz.o _bswapsi2.o
+          ar rcs libctz.a _ctzsi2.o _clz.o _bswapsi2.o
+
+          rustup toolchain install nightly-x86_64-unknown-linux-gnu
+          rustup component add rust-src --toolchain nightly-x86_64-unknown-linux-gnu
+          # https://github.com/rust-lang/rust/issues/128808
+          # remove it after Cargo or rustc fix this.
+          RUST_LIB_SRC=$HOME/.rustup/toolchains/nightly-x86_64-unknown-linux-gnu/lib/rustlib/src/rust/
+          if [[ -f $RUST_LIB_SRC/library/Cargo.lock && ! -f $RUST_LIB_SRC/Cargo.lock ]]; then 
+              cp -f $RUST_LIB_SRC/library/Cargo.lock $RUST_LIB_SRC/Cargo.lock
+          fi
+          cat >>~/.cargo/config <<EOF
+          [target.mipsel-unknown-linux-musl]
+          linker = "mipsel-openwrt-linux-musl-gcc"
+          rustflags = ["-L", "/opt/musl_gcc/toolchain-mipsel_24kc_gcc-12.3.0_musl/lib",
+          "-L", "/opt/musl_gcc/toolchain-mipsel_24kc_gcc-12.3.0_musl/lib/gcc/mipsel-openwrt-linux-musl/12.3.0"]
+          EOF
+      - name: 开始编译
+        run: |
+          [[ -n $feature ]] && echo "当前添加的模块有 ${feature}" && FEATURES="--features ${feature}"
+          export KCP_SYS_EXTRA_HEADER_PATH=/usr/include/musl-cross
+          cargo +nightly build -r --target mipsel-unknown-linux-musl -Z build-std=std,panic_abort --no-default-features $FEATURES
+          mkdir -p /opt/bin
+          mv ./target/mipsel-unknown-linux-musl/release/easytier-core /opt/bin/easytier-core
+      - name: Install UPX
+        uses: crazy-max/ghaction-upx@v3
+        with:
+          version: latest
+          install-only: true
+      - name: 打包压缩
+        if: github.event.inputs.upx == 'true'
+        run: |
+          cd /opt/bin
+          ls -alh easytier-core
+          mipsel-openwrt-linux-strip easytier-core
+          upx --lzma --best easytier-core
+          ls -alh easytier-core
+      - name: 上传
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ET
+          path: /opt/bin/*
