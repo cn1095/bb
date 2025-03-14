@@ -53,7 +53,7 @@ jobs:
           cat >>~/.cargo/config <<EOF
           [target.mipsel-unknown-linux-musl]
           linker = "mipsel-openwrt-linux-musl-gcc"
-          rustflags = ["-C", "opt-level=z", "-C", "strip=symbols", "-C", "lto=fat", "-C", "codegen-units=1",
+          rustflags = ["-C", "opt-level=z", "-C", "strip=symbols", 
           "-L", "/opt/musl_gcc/toolchain-mipsel_24kc_gcc-12.3.0_musl/lib",
           "-L", "/opt/musl_gcc/toolchain-mipsel_24kc_gcc-12.3.0_musl/lib/gcc/mipsel-openwrt-linux-musl/12.3.0"]
           EOF
@@ -62,7 +62,7 @@ jobs:
           [[ -n $feature ]] && echo "当前添加的模块有 ${feature}" && FEATURES="--features ${feature}"
           export KCP_SYS_EXTRA_HEADER_PATH=/usr/include/musl-cross
           rm -rf .cargo
-          cargo +nightly build -r --target mipsel-unknown-linux-musl -Z build-std=std,panic_abort --no-default-features $FEATURES
+          cargo +nightly build -p easytier -r --target mipsel-unknown-linux-musl -Z build-std=std,panic_abort --no-default-features $FEATURES
           mkdir -p /opt/bin
           mv ./target/mipsel-unknown-linux-musl/release/easytier-core /opt/bin/easytier-core
       - name: 安装UPX
