@@ -59,6 +59,8 @@ jobs:
         run: |
           cd /opt/bin
           ls -alh easytier-core
+          file easytier-core
+          ldd easytier-core || true
           aarch64-openwrt-linux-strip easytier-core
           upx --lzma --best easytier-core
           ls -alh easytier-core
