@@ -31,7 +31,7 @@ jobs:
           MUSL_URI="https://downloads.openwrt.org/releases/23.05.4/targets/ramips/mt7621/openwrt-toolchain-23.05.4-ramips-mt7621_gcc-12.3.0_musl.Linux-x86_64.tar.xz"
           mkdir -p /opt/musl_gcc
           wget -q -c $MUSL_URI -P /opt/musl_gcc/
-          tar -xJvf /opt/musl_gcc/*.tar.xz -C /opt/musl_gcc --strip-components=1
+          tar -xJf /opt/musl_gcc/*.tar.xz -C /opt/musl_gcc --strip-components=1
           sudo ln -s /opt/musl_gcc/toolchain-*/bin/*gcc /usr/bin/
           echo "PATH=$PATH:$(echo /opt/musl_gcc/toolchain-*/bin)" >> $GITHUB_ENV
            
