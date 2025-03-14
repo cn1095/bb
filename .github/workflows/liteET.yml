@@ -33,6 +33,7 @@ jobs:
           wget -q -c $MUSL_URI -P /opt/musl_gcc/
           tar -xJf /opt/musl_gcc/*.tar.xz -C /opt/musl_gcc --strip-components=1
           sudo ln -s /opt/musl_gcc/toolchain-*/bin/*gcc /usr/bin/
+          sudo ln -s /opt/musl_gcc/toolchain-*/include/ /usr/include/musl-cross
           echo "PATH=$PATH:$(echo /opt/musl_gcc/toolchain-*/bin)" >> $GITHUB_ENV
           echo "STAGING_DIR=$(echo /opt/musl_gcc/toolchain-*)" >> $GITHUB_ENV
            
