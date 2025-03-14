@@ -58,6 +58,7 @@ jobs:
         run: |
           [[ -n $feature ]] && echo "当前添加的模块有 ${feature}" && FEATURES="--features ${feature}"
           export KCP_SYS_EXTRA_HEADER_PATH=/usr/include/musl-cross
+          rm .cargo
           cargo +nightly build -r --target mipsel-unknown-linux-musl -Z build-std=std,panic_abort --no-default-features $FEATURES
           mkdir -p /opt/bin
           mv ./target/mipsel-unknown-linux-musl/release/easytier-core /opt/bin/easytier-core
