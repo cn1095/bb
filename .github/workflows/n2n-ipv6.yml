@@ -79,6 +79,7 @@ jobs:
           fi
           sed -i '/N2N_HAS_CAPABILITIES/d' n2n.h
           sed -i '/capability.h/d' n2n.h
+          sed -i '/if\s*(\s*${CMAKE_SYSTEM_NAME}.*Linux\s*)/,/endif\s*()/d' CMakeLists.txt
           sed -i '/linux\/prctl.h/d' n2n.h
           mkdir build
           cd build
