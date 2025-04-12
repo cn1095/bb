@@ -79,7 +79,7 @@ jobs:
           fi
           sed -i '/N2N_HAS_CAPABILITIES/d' n2n.h
           sed -i '/capability.h/d' n2n.h
-          sed -i '|linux/prctl.h|d' n2n.h
+          sed -i '/linux\/prctl.h/d' n2n.h
           mkdir build
           cd build
           cmake .. \
