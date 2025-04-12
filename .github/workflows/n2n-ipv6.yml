@@ -96,6 +96,7 @@ jobs:
           -DOPENSSL_USE_STATIC_LIBS=ON \
           -DUSE_OPENSSL=ON \
           -DN2N_OPTION_AES=ON
+          make
           ls
           file edge
           file supernode
