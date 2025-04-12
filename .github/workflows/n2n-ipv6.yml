@@ -77,6 +77,8 @@ jobs:
             make install
             cd ../
           fi
+          mkdir build
+          cd build
           cmake .. \
           -DCMAKE_SYSTEM_NAME=Linux \
           -DCMAKE_C_COMPILER=/opt/musl_gcc/${TARGET}-cross/bin/${TARGET}-gcc \
