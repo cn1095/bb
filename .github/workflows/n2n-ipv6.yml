@@ -82,6 +82,8 @@ jobs:
           sed -i '/linux\/prctl.h/d' n2n.h
           mkdir build
           cd build
+          export CFLAGS="-I/opt/openssl-${TARGET}/include $CFLAGS"
+          export LDFLAGS="-L/opt/openssl-${TARGET}/lib $LDFLAGS"
           cmake .. \
           -DCMAKE_SYSTEM_NAME=Linux \
           -DCMAKE_C_COMPILER=/opt/musl_gcc/${TARGET}-cross/bin/${TARGET}-gcc \
@@ -96,9 +98,6 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DBUILD_SHARED_LIBS=OFF \
           -DOPENSSL_ROOT_DIR=/opt/openssl-${TARGET} \
-          -DOPENSSL_INCLUDE_DIR=/opt/openssl-${TARGET}/include \
-          -DOPENSSL_CRYPTO_LIBRARY=/opt/openssl-${TARGET}/lib/libcrypto.a \
-          -DOPENSSL_SSL_LIBRARY=/opt/openssl-${TARGET}/lib/libssl.a \
           -DOPENSSL_USE_STATIC_LIBS=ON \
           -DUSE_OPENSSL=ON \
           -DN2N_OPTION_AES=ON
