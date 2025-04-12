@@ -93,7 +93,9 @@ jobs:
           -DCMAKE_BUILD_TYPE=Release \
           -DBUILD_SHARED_LIBS=OFF \
           -DOPENSSL_ROOT_DIR=/opt/openssl-${TARGET} \
-          -DOPENSSL_USE_STATIC_LIBS=ON
+          -DOPENSSL_USE_STATIC_LIBS=ON \
+          -DUSE_OPENSSL=ON \
+          -DN2N_OPTION_AES=ON
           ls
           file edge
           file supernode
