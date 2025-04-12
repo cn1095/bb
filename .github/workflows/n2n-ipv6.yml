@@ -44,13 +44,6 @@ jobs:
           path: |
             /opt/openssl-${{ env.TARGET }}
           key: openssl-${{ env.TARGET }}-cache
-      - name: 缓存 libcap
-        id: cache-libcap
-        uses: actions/cache@v4
-        with:
-          path: |
-            /opt/libcap-${{ env.TARGET }}
-          key: libcap-${{ env.TARGET }}-cache
       - name: 下载编译工具链
         run: |
           mkdir -p /opt/musl_gcc 
@@ -84,16 +77,8 @@ jobs:
             make install
             cd ../
           fi
-          if [ ! -d "/opt/libcap-${{ env.TARGET }}" ]; then
-            git clone https://git.kernel.org/pub/scm/libs/libcap/libcap.git
-            cd libcap
-            make CC=/opt/musl_gcc/${{ env.TARGET }}-cross/bin/${{ env.TARGET }}-gcc \
-               AR=/opt/musl_gcc/${{ env.TARGET }}-cross/bin/${{ env.TARGET }}-ar \
-               RANLIB=/opt/musl_gcc/${{ env.TARGET }}-cross/bin/${{ env.TARGET }}-ranlib \
-               prefix=/opt/libcap-${{ env.TARGET }} \
-               install
-            cd ../
-          fi
+          sed -i '/N2N_HAS_CAPABILITIES/d' n2n.h
+          sed -i '/capability.h/d' n2n.h
           mkdir build
           cd build
           cmake .. \
@@ -103,11 +88,10 @@ jobs:
           -DCMAKE_AR=/opt/musl_gcc/${TARGET}-cross/bin/${TARGET}-ar \
           -DCMAKE_RANLIB=/opt/musl_gcc/${TARGET}-cross/bin/${TARGET}-ranlib \
           -DCMAKE_STRIP=/opt/musl_gcc/${TARGET}-cross/bin/${TARGET}-strip \
-          -DCMAKE_FIND_ROOT_PATH=/opt/musl_gcc/${TARGET}-cross/${TARGET}:/opt/libcap-${TARGET} \
+          -DCMAKE_FIND_ROOT_PATH=/opt/musl_gcc/${TARGET}-cross/${TARGET} \
           -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
           -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
           -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
-          -DHAVE_SYS_CAPABILITY_H=1 \
           -DCMAKE_BUILD_TYPE=Release \
           -DBUILD_SHARED_LIBS=OFF \
           -DOPENSSL_ROOT_DIR=/opt/openssl-${TARGET} \
