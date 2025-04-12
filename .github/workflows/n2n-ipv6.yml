@@ -1,0 +1,109 @@
+name: 编译N2N-ipv6
+
+on:
+  workflow_dispatch:
+  
+jobs:
+  build:
+    name: ${{ matrix.TARGET }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - TARGET: aarch64-linux-musl
+            OPENSSL_TARGET: linux-aarch64
+          - TARGET: armv7l-linux-musleabihf
+            OPENSSL_TARGET: linux-armv4
+          - TARGET: armv7m-linux-musleabi
+            OPENSSL_TARGET: linux-armv4
+          - TARGET: arm-linux-musleabi
+            OPENSSL_TARGET: linux-armv4
+          - TARGET: arm-linux-musleabihf
+            OPENSSL_TARGET: linux-armv4
+          - TARGET: mipsel-linux-muslsf
+            OPENSSL_TARGET: linux-mips32
+          - TARGET: mips-linux-muslsf
+            OPENSSL_TARGET: linux-mips32
+          - TARGET: i686-linux-musl
+            OPENSSL_TARGET: linux-generic32
+          - TARGET: x86_64-linux-musl
+            OPENSSL_TARGET: linux-x86_64
+    runs-on: ubuntu-latest
+    env:
+      OPENSSL_TARGET: ${{ matrix.OPENSSL_TARGET }}
+      TARGET: ${{ matrix.TARGET }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          repository: 'mxre/n2n'
+      - name: 缓存 OpenSSL 
+        id: cache-openssl
+        uses: actions/cache@v4
+        with:
+          path: |
+            /opt/openssl-${{ env.TARGET }}
+          key: openssl-${{ env.TARGET }}-cache
+      - name: 下载编译工具链
+        run: |
+          mkdir -p /opt/musl_gcc 
+          sudo timedatectl set-timezone "Asia/Shanghai"
+          #下载编译器
+          wget -q -c https://musl.cc/${{ env.TARGET }}-cross.tgz -P /opt/musl_gcc/
+          tar zxf /opt/musl_gcc/${{ env.TARGET }}-cross.tgz -C /opt/musl_gcc/
+          
+      - name: 安装 UPX
+        uses: crazy-max/ghaction-upx@v3
+        with:
+          version: v4.2.4
+          install-only: true
+      - name: 编译
+        run: |
+          export PATH=/opt/musl_gcc/${{ env.TARGET }}-cross/bin:$PATH
+          export CC=/opt/musl_gcc/${{ env.TARGET }}-cross/bin/${{ env.TARGET }}-gcc
+          export CXX=/opt/musl_gcc/${{ env.TARGET }}-cross/bin/${{ env.TARGET }}-g++
+          export AR=/opt/musl_gcc/${{ env.TARGET }}-cross/bin/${{ env.TARGET }}-ar
+          export LD=/opt/musl_gcc/${{ env.TARGET }}-cross/bin/${{ env.TARGET }}-ld
+          export RANLIB=/opt/musl_gcc/${{ env.TARGET }}-cross/bin/${{ env.TARGET }}-ranlib
+          export STRIP=/opt/musl_gcc/${{ env.TARGET }}-cross/bin/${{ env.TARGET }}-strip
+
+          if [ ! -d "/opt/openssl-${{ env.TARGET }}" ]; then
+            #克隆openssl
+            git clone --recursive https://github.com/openssl/openssl -b OpenSSL_1_1_1-stable
+            cd openssl
+            echo "###########################编译openssl依赖库########################"
+            ./Configure no-shared no-zlib --prefix=/opt/openssl-${{ env.TARGET }} ${{ env.OPENSSL_TARGET }} LDFLAGS="-static -I/opt/musl_gcc/${{ env.TARGET }}-cross/${{ env.TARGET }}/include -L/opt/musl_gcc/${{ env.TARGET }}-cross/${{ env.TARGET }}/lib" CFLAGS="-static -I/opt/musl_gcc/${{ env.TARGET }}-cross/${{ env.TARGET }}/include -L/opt/musl_gcc/${{ env.TARGET }}-cross/${{ env.TARGET }}/lib"
+            make -j$(nproc)
+            make install
+            cd ../
+          fi
+          cmake .. \
+          -DCMAKE_SYSTEM_NAME=Linux \
+          -DCMAKE_C_COMPILER=/opt/musl_gcc/${TARGET}-cross/bin/${TARGET}-gcc \
+          -DCMAKE_CXX_COMPILER=/opt/musl_gcc/${TARGET}-cross/bin/${TARGET}-g++ \
+          -DCMAKE_AR=/opt/musl_gcc/${TARGET}-cross/bin/${TARGET}-ar \
+          -DCMAKE_RANLIB=/opt/musl_gcc/${TARGET}-cross/bin/${TARGET}-ranlib \
+          -DCMAKE_STRIP=/opt/musl_gcc/${TARGET}-cross/bin/${TARGET}-strip \
+          -DCMAKE_FIND_ROOT_PATH=/opt/musl_gcc/${TARGET}-cross/${TARGET} \
+          -DCMAKE_FIND_ROOT_PATH_MODE_PROGRAM=NEVER \
+          -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY \
+          -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DBUILD_SHARED_LIBS=OFF \
+          -DOPENSSL_ROOT_DIR=/opt/openssl-${TARGET} \
+          -DOPENSSL_USE_STATIC_LIBS=ON
+          ls
+          file edge
+          file supernode
+          mkdir -p /opt/bin
+          rm -rf /opt/bin/c_rehash /opt/bin/openssl || true 
+          mv -f edge /opt/bin/
+          mv -f supernode /opt/bin/
+          /opt/musl_gcc/${{ env.TARGET }}-cross/bin/${{ env.TARGET }}-strip /opt/bin/* || true
+          file /opt/bin/* || true
+          upx --lzma --best /opt/bin/* || true
+      - name: 上传
+        uses: actions/upload-artifact@v4
+        with:
+          name: N2N_ipv6-${{ matrix.TARGET }}
+          path: /opt/bin/*
