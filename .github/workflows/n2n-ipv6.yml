@@ -83,8 +83,8 @@ jobs:
           sed -i '/linux\/prctl.h/d' n2n.h
           mkdir build
           cd build
-          export CFLAGS="-I/opt/openssl-${TARGET}/include $CFLAGS"
-          export LDFLAGS="-L/opt/openssl-${TARGET}/lib $LDFLAGS"
+          export CFLAGS="-I/opt/openssl-${TARGET}/include -static $CFLAGS"
+          export LDFLAGS="-L/opt/openssl-${TARGET}/lib -static $LDFLAGS"
           cmake .. \
           -DCMAKE_SYSTEM_NAME=Linux \
           -DCMAKE_C_COMPILER=/opt/musl_gcc/${TARGET}-cross/bin/${TARGET}-gcc \
