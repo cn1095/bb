@@ -72,7 +72,7 @@ jobs:
             git clone --recursive https://github.com/openssl/openssl -b OpenSSL_1_1_1-stable
             cd openssl
             echo "###########################编译openssl依赖库########################"
-            ./Configure no-shared no-zlib --prefix=/opt/openssl-${{ env.TARGET }} ${{ env.OPENSSL_TARGET }} LDFLAGS="-static -I/opt/musl_gcc/${{ env.TARGET }}-cross/${{ env.TARGET }}/include -L/opt/musl_gcc/${{ env.TARGET }}-cross/${{ env.TARGET }}/lib" CFLAGS="-static -I/opt/musl_gcc/${{ env.TARGET }}-cross/${{ env.TARGET }}/include -L/opt/musl_gcc/${{ env.TARGET }}-cross/${{ env.TARGET }}/lib"
+            ./Configure no-shared no-zlib --prefix=/opt/openssl-${{ env.TARGET }} ${{ env.OPENSSL_TARGET }} LDFLAGS="-static -O2 -I/opt/musl_gcc/${{ env.TARGET }}-cross/${{ env.TARGET }}/include -L/opt/musl_gcc/${{ env.TARGET }}-cross/${{ env.TARGET }}/lib" CFLAGS="-static -I/opt/musl_gcc/${{ env.TARGET }}-cross/${{ env.TARGET }}/include -L/opt/musl_gcc/${{ env.TARGET }}-cross/${{ env.TARGET }}/lib"
             make -j$(nproc)
             make install
             cd ../
@@ -112,7 +112,7 @@ jobs:
           mv -f supernode /opt/bin/
           /opt/musl_gcc/${{ env.TARGET }}-cross/bin/${{ env.TARGET }}-strip /opt/bin/* || true
           file /opt/bin/* || true
-          #upx --lzma --best /opt/bin/* || true
+          upx --lzma --best /opt/bin/* || true
       - name: 上传
         uses: actions/upload-artifact@v4
         with:
