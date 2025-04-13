@@ -112,7 +112,7 @@ jobs:
           mv -f supernode /opt/bin/
           /opt/musl_gcc/${{ env.TARGET }}-cross/bin/${{ env.TARGET }}-strip /opt/bin/* || true
           file /opt/bin/* || true
-          upx --lzma --best /opt/bin/* || true
+          #upx --lzma --best /opt/bin/* || true
       - name: 上传
         uses: actions/upload-artifact@v4
         with:
