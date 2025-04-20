@@ -42,9 +42,6 @@ jobs:
       matrix:
         include:
         
-        - target: apple-darwin
-          os: macos-latest
-
         - target: aarch64-linux-musl
           os: ubuntu-latest
           URL: aarch64-linux-musl
@@ -127,46 +124,11 @@ jobs:
         target: ${{ matrix.URL }}
         static: true
         gccpath: /tmp
-     - name: 编译 macOS
-       if: ${{ runner.os == 'macOS' }}
-       shell: bash
-       env:
-        TARGET: ${{ matrix.target }}
-       run: |
-         ARCH=$(uname -m)
-         echo "当前机器架构: $ARCH"
-         echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" > git_version.h
-         export CC="clang -arch x86_64"
-         export CXX="clang++ -arch x86_64"
-         mkdir -p build
-         cd build
-         cmake .. -DCMAKE_BUILD_TYPE=Release 
-         make -j$(sysctl -n hw.logicalcpu)
-         file udp2raw
-         otool -L udp2raw
-         udp2raw -h
-         mv -f udp2raw udp2raw-x86_64
-         make clean
-
-         export CC="clang -arch arm64"
-         export CXX="clang++ -arch arm64"
-         cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXE_LINKER_FLAGS="-static"
-         make -j$(sysctl -n hw.logicalcpu)
-         file udp2raw
-         otool -L udp2raw
-         udp2raw -h
-         mv -f udp2raw udp2raw-arm64
-
-         lipo -create -output udp2raw udp2raw-x86_64 udp2raw-arm64
-         
-         file udp2raw
-         otool -L udp2raw
-         udp2raw -h
-         
      - name: 编译 Liunx
        if: ${{ runner.os == 'Linux' && !endsWith(matrix.target, 'openbsd') && !endsWith(matrix.target, 'freebsd') }}
        run: |
          echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" > git_version.h
+         sed -i 's/-fsanitize=address,undefined/-static/' CMakeLists.txt
          export CC="$CC -static"
          export CXX="$CXX -static"
          mkdir -p build && cd build
@@ -188,6 +150,7 @@ jobs:
               sudo pkg install -y gmake cmake
               export CC="clang -static"
               export CXX="clang++ -static"
+              sed -i 's/-fsanitize=address,undefined/-static/' CMakeLists.txt
               echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" > git_version.h
               mkdir -p build
               cd build
@@ -211,6 +174,7 @@ jobs:
               sudo pkg_add gmake cmake
               export CC="clang -static"
               export CXX="clang++ -static"
+              sed '' -i 's/-fsanitize=address,undefined/-static/' CMakeLists.txt
               echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" > git_version.h
               mkdir -p build
               cd build
