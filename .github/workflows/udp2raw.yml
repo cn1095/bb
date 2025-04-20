@@ -116,13 +116,13 @@ jobs:
          file udp2raw
      
      - name: 安装 UPX
-       if: ${{ github.event.inputs.upx == 'true' }}
+       if: ${{ github.event.inputs.upx == 'true' && !startsWith(matrix.target, 's390x') && !startsWith(matrix.target, 'loongarch64') }}
        uses: crazy-max/ghaction-upx@v3
        with:
         version: v4.2.4
         install-only: true
      - name: 压缩
-       if: ${{ github.event.inputs.upx == 'true' }}
+       if: ${{ github.event.inputs.upx == 'true' && !startsWith(matrix.target, 's390x') && !startsWith(matrix.target, 'loongarch64') }}
        run: upx --lzma --best build/udp2raw
      - uses: actions/upload-artifact@v4
        with:
