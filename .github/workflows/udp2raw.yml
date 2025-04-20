@@ -150,7 +150,7 @@ jobs:
               sudo pkg install -y gmake cmake
               export CC="clang -static"
               export CXX="clang++ -static"
-              sed -i 's/-fsanitize=address,undefined/-static/' CMakeLists.txt
+              sed -i '' 's/-fsanitize=address,undefined/-static/' CMakeLists.txt
               echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" > git_version.h
               mkdir -p build
               cd build
@@ -174,7 +174,7 @@ jobs:
               sudo pkg_add gmake cmake
               export CC="clang -static"
               export CXX="clang++ -static"
-              sed '' -i 's/-fsanitize=address,undefined/-static/' CMakeLists.txt
+              sed -i 's/-fsanitize=address,undefined/-static/' CMakeLists.txt
               echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" > git_version.h
               mkdir -p build
               cd build
