@@ -44,19 +44,7 @@ jobs:
         
         - target: apple-darwin
           os: macos-latest
-          
-        - target: x86_64-pc-windows
-          os: ubuntu-latest
-          URL: x86_64-w64-mingw32
 
-        - target: i686-pc-windows
-          os: ubuntu-latest
-          URL: i686-w64-mingw32
-
-        - target: aarch64-pc-windows
-          os: ubuntu-latest
-          URL: aarch64-w64-mingw32
-          
         - target: aarch64-linux-musl
           os: ubuntu-latest
           URL: aarch64-linux-musl
@@ -147,12 +135,12 @@ jobs:
        run: |
          ARCH=$(uname -m)
          echo "当前机器架构: $ARCH"
-         
+         echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" > git_version.h
          export CC="clang -arch x86_64"
          export CXX="clang++ -arch x86_64"
          mkdir -p build
          cd build
-         cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_EXE_LINKER_FLAGS="-static"
+         cmake .. -DCMAKE_BUILD_TYPE=Release 
          make -j$(sysctl -n hw.logicalcpu)
          file udp2raw
          otool -L udp2raw
@@ -175,25 +163,17 @@ jobs:
          otool -L udp2raw
          udp2raw -h
          
-     - name: 编译 Liunx Windows
+     - name: 编译 Liunx
        if: ${{ runner.os == 'Linux' && !endsWith(matrix.target, 'openbsd') && !endsWith(matrix.target, 'freebsd') }}
        run: |
+         echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" > git_version.h
          export CC="$CC -static"
          export CXX="$CXX -static"
          mkdir -p build && cd build
          cmake .. -DCMAKE_BUILD_TYPE=Release
          make -j$(nproc)
-         if [[ "${{ matrix.target }}" == "x86_64-pc-windows" ]] ; then
-            
-            ls
-         elif [[ "${{ matrix.target }}" == "i686-pc-windows" ]] ; then
-            ls
-         elif [[ "${{ matrix.target }}" == "aarch64-pc-windows" ]] ; then
-            ls
-         else
-            $STRIP udp2raw
-            file udp2raw
-         fi
+         $STRIP udp2raw
+         file udp2raw
      - name: 编译 FreeBSD
        if: ${{ endsWith(matrix.target, 'freebsd') }}
        uses: cross-platform-actions/action@master
@@ -208,6 +188,7 @@ jobs:
               sudo pkg install -y gmake cmake
               export CC="clang -static"
               export CXX="clang++ -static"
+              echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" > git_version.h
               mkdir -p build
               cd build
               cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -230,6 +211,7 @@ jobs:
               sudo pkg_add gmake cmake
               export CC="clang -static"
               export CXX="clang++ -static"
+              echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" > git_version.h
               mkdir -p build
               cd build
               cmake .. -DCMAKE_BUILD_TYPE=Release
@@ -239,13 +221,13 @@ jobs:
               ldd udp2raw || true
               udp2raw -h
      - name: 安装 UPX
-       if: ${{ runner.os == 'Linux' && !endsWith(matrix.target, 'windows') && !endsWith(matrix.target, 'openbsd') && !endsWith(matrix.target, 'freebsd') && !startsWith(matrix.target, 's390x') && !startsWith(matrix.target, 'loongarch64') && github.event.inputs.upx == 'true' }}
+       if: ${{ runner.os == 'Linux' && !endsWith(matrix.target, 'openbsd') && !endsWith(matrix.target, 'freebsd') && !startsWith(matrix.target, 's390x') && !startsWith(matrix.target, 'loongarch64') && github.event.inputs.upx == 'true' }}
        uses: crazy-max/ghaction-upx@v3
        with:
         version: v4.2.4
         install-only: true
      - name: 压缩
-       if: ${{ runner.os == 'Linux' && !endsWith(matrix.target, 'windows') && !endsWith(matrix.target, 'openbsd') && !endsWith(matrix.target, 'freebsd') && !startsWith(matrix.target, 's390x') && !startsWith(matrix.target, 'loongarch64') && github.event.inputs.upx == 'true' }}
+       if: ${{ runner.os == 'Linux' && !endsWith(matrix.target, 'openbsd') && !endsWith(matrix.target, 'freebsd') && !startsWith(matrix.target, 's390x') && !startsWith(matrix.target, 'loongarch64') && github.event.inputs.upx == 'true' }}
        run: upx --lzma --best build/udp2raw
      - uses: actions/upload-artifact@v4
        with:
