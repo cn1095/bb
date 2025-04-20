@@ -130,7 +130,7 @@ jobs:
      - name: Checkout code
        uses: actions/checkout@v4
        with:
-        repository: gnbdev/opengnb
+        repository: MikeWang000000/udp2raw
         ref: ${{ env.branch }}
      - name: 下载linux-musl-gcc
        if: ${{ runner.os == 'Linux' && !endsWith(matrix.target, 'openbsd') && !endsWith(matrix.target, 'freebsd') }}
