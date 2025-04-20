@@ -195,7 +195,7 @@ jobs:
        run: upx --lzma --best build/udp2raw
      - uses: actions/upload-artifact@v4
        with:
-        name: udp2raw-${{ env.branch }}-${{ matrix.target }}
+        name: udp2raw-${{ matrix.target }}
         path: build/udp2raw
      - name: 日期
        if: github.event.inputs.rel == 'true'
