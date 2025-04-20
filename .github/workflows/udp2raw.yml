@@ -1,4 +1,4 @@
-name: udp2raw-build
+name: udp2raw
 on:
   workflow_dispatch:
     inputs:
@@ -9,12 +9,12 @@ on:
       del:
         description: '是否删除历史编译的流程记录'
         required: true
-        default: false
+        default: true
         type: boolean
       rel:
         description: '编译完成后是否发布Release'
         required: true
-        default: false
+        default: true
         type: boolean
       tag:
         description: '指定Release的版本号（留空为源码提交哈希值）'
