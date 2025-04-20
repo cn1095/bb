@@ -90,26 +90,6 @@ jobs:
           os: ubuntu-latest
           URL: loongarch64-linux-musl
 
-        - target: x86_64-freebsd
-          os: ubuntu-latest
-          arch: x86-64
-          version: '14.2'
-
-        - target: x86_64-openbsd
-          os: ubuntu-latest
-          arch: x86-64
-          version: '7.6'
-
-        - target: arm64-freebsd
-          os: ubuntu-latest
-          arch: arm64
-          version: '14.2'
-
-        - target: arm64-openbsd
-          os: ubuntu-latest
-          arch: arm64
-          version: '7.6'
-
     runs-on: ${{ matrix.os }}
     steps:
      - name: Checkout code
@@ -118,14 +98,12 @@ jobs:
         repository: MikeWang000000/udp2raw
         ref: ${{ env.branch }}
      - name: 下载linux-musl-gcc
-       if: ${{ runner.os == 'Linux' && !endsWith(matrix.target, 'openbsd') && !endsWith(matrix.target, 'freebsd') }}
        uses: lmq8267/dl-musl@main
        with:
         target: ${{ matrix.URL }}
         static: true
         gccpath: /tmp
-     - name: 编译 Liunx
-       if: ${{ runner.os == 'Linux' && !endsWith(matrix.target, 'openbsd') && !endsWith(matrix.target, 'freebsd') }}
+     - name: 编译
        run: |
          echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" > git_version.h
          sed -i 's/-fsanitize=address,undefined/-static/' CMakeLists.txt
@@ -136,62 +114,15 @@ jobs:
          make -j$(nproc)
          $STRIP udp2raw
          file udp2raw
-     - name: 编译 FreeBSD
-       if: ${{ endsWith(matrix.target, 'freebsd') }}
-       uses: cross-platform-actions/action@master
-       with:
-         operating_system: freebsd
-         architecture: ${{ matrix.arch }}
-         version: ${{ matrix.version }}
-         shell: bash
-         memory: 5G
-         cpu_count: 4
-         run: |
-              sudo pkg install -y gmake cmake
-              export CC="clang -static"
-              export CXX="clang++ -static"
-              sed -i '' 's/-fsanitize=address,undefined/-static/' CMakeLists.txt
-              echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" > git_version.h
-              mkdir -p build
-              cd build
-              cmake .. -DCMAKE_BUILD_TYPE=Release
-              gmake -j$(sysctl -n hw.ncpu)
-              strip udp2raw
-              file udp2raw
-              ldd udp2raw || true
-              udp2raw -h
-     - name: 编译 OpenBSD
-       if: ${{ endsWith(matrix.target, 'openbsd') }}
-       uses: cross-platform-actions/action@master
-       with:
-         operating_system: openbsd
-         architecture: ${{ matrix.arch }}
-         version: ${{ matrix.version }}
-         shell: bash
-         memory: 5G
-         cpu_count: 4
-         run: |
-              sudo pkg_add gmake cmake
-              export CC="clang -static"
-              export CXX="clang++ -static"
-              sed -i 's/-fsanitize=address,undefined/-static/' CMakeLists.txt
-              echo "const char *gitversion = \"$(shell git rev-parse HEAD)\";" > git_version.h
-              mkdir -p build
-              cd build
-              cmake .. -DCMAKE_BUILD_TYPE=Release
-              gmake -j$(sysctl -n hw.ncpu)
-              strip udp2raw
-              file udp2raw
-              ldd udp2raw || true
-              udp2raw -h
+     
      - name: 安装 UPX
-       if: ${{ runner.os == 'Linux' && !endsWith(matrix.target, 'openbsd') && !endsWith(matrix.target, 'freebsd') && !startsWith(matrix.target, 's390x') && !startsWith(matrix.target, 'loongarch64') && github.event.inputs.upx == 'true' }}
+       if: ${{ github.event.inputs.upx == 'true' }}
        uses: crazy-max/ghaction-upx@v3
        with:
         version: v4.2.4
         install-only: true
      - name: 压缩
-       if: ${{ runner.os == 'Linux' && !endsWith(matrix.target, 'openbsd') && !endsWith(matrix.target, 'freebsd') && !startsWith(matrix.target, 's390x') && !startsWith(matrix.target, 'loongarch64') && github.event.inputs.upx == 'true' }}
+       if: ${{ github.event.inputs.upx == 'true' }}
        run: upx --lzma --best build/udp2raw
      - uses: actions/upload-artifact@v4
        with:
