@@ -63,7 +63,15 @@ jobs:
           echo '}' >> "$build_path"
 
           sed -i 's/flutter_rust_bridge = "=2.9.0"/flutter_rust_bridge = "=2.8.0"/g' C:/astral/rust/Cargo.toml
-          sed -i 's/2.9.0/2.8.0/g' C:/astral/rust/src/frb_generated.rs
+          flutter pub add flutter_rust_bridge@2.8.0
+          flutter pub get
+          flutter pub run flutter_rust_bridge:generate \
+            --rust-input C:/astral/rust/src/api/mod.rs \
+            --rust-output C:/astral/rust/src/frb_generated.rs \
+            --dart-output C:/astral/lib/src/rust/frb_generated.dart \
+            --dart-decl-output C:/astral/lib/src/rust/frb_generated.io.dart \
+            --dart-web-output C:/astral/lib/src/rust/frb_generated.web.dart \
+            --dart-simple-output C:/astral/lib/src/rust/api/simple.dart
           sed -i 's/build_runner: \^2\.4\.15/build_runner: ^2.3.0/g' C:/astral/pubspec.yaml
           sed -i 's/path: \^1\.9\.1/path: ^1.9.0/g' C:/astral/pubspec.yaml
           sed -i 's/floor_generator: \^1\.5\.0/floor_generator: ^1.3.0/g' C:/astral/pubspec.yaml
