@@ -73,13 +73,11 @@ jobs:
             Add-Content $cargoPath 'thunk-rs = { version = "0.3.3", features = ["win7"] }'
           }
 
-          # 写入 build.rs 文件
-          Set-Content $buildScriptPath @"
-            fn main() {
-                // 配置 thunk-rs 来链接 Windows 7 兼容库，并自动设置链接参数
-                thunk::thunk();
-            }
-            "@
+           # 写入 build.rs 文件（逐行写入）
+          Set-Content $buildScriptPath 'fn main() {'
+          Add-Content $buildScriptPath '    // 配置 thunk-rs 来链接 Windows 7 兼容库，并自动设置链接参数'
+          Add-Content $buildScriptPath '    thunk::thunk();'
+          Add-Content $buildScriptPath '}'
           
       - name: 构建 Windows astral
         run: |
