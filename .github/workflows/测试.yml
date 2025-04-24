@@ -49,7 +49,7 @@ jobs:
       - name: 克隆源码
         run: git clone -b "${{ env.tag }}" "https://github.com/${{ env.repo }}" C:\astral
 
-      - name: 配置 thunk-rs 依赖和 build.rs 文件
+      - name: 配置 thunk-rs 依赖和 build.rs 文件并降级依赖版本
         shell: bash
         run: |
           cargo_path="C:/astral/rust/Cargo.toml"
@@ -61,8 +61,7 @@ jobs:
           echo 'fn main() {' >> "$build_path"
           echo '   thunk::thunk();' >> "$build_path"
           echo '}' >> "$build_path"
-          cat $cargo_path
-          cat $build_path
+          
           sed -i 's/build_runner: \^2\.4\.15/build_runner: ^2.3.0/g' C:/astral/pubspec.yaml
           sed -i 's/path: \^1\.9\.1/path: ^1.9.0/g' C:/astral/pubspec.yaml
           sed -i 's/floor_generator: \^1\.5\.0/floor_generator: ^1.3.0/g' C:/astral/pubspec.yaml
@@ -88,7 +87,7 @@ jobs:
           flutter pub get
           flutter build windows --release 
           echo "构建完成，开始列出生成的文件"
-          dir C:\astral\build\windows\x64\runner\Release
+          dir C:\astral\build\windows\x64\runner\Release -v
           Copy-Item -Path C:\astral\assets\dlls\* -Destination C:\astral\build\windows\x64\runner\Release -Recurse -Force
           
       - name: 上传
