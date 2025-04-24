@@ -64,10 +64,6 @@ jobs:
 
           sed -i 's/flutter_rust_bridge: 2\.9\.0/flutter_rust_bridge: 2.8.0/g' C:/astral/pubspec.yaml
           sed -i 's/flutter_rust_bridge = "=2.9.0"/flutter_rust_bridge = "=2.8.0"/g' C:/astral/rust/Cargo.toml
-          cd C:/astral
-          flutter pub add flutter_rust_bridge@2.8.0
-          flutter pub get
-          flutter pub run flutter_rust_bridge:generate --rust-input rust/src/api/mod.rs --rust-output rust/src/frb_generated.rs --dart-output lib/src/rust/frb_generated.dart --dart-decl-output lib/src/rust/frb_generated.io.dart --dart-web-output lib/src/rust/frb_generated.web.dart --dart-simple-output lib/src/rust/api/simple.dart
           sed -i 's/build_runner: \^2\.4\.15/build_runner: ^2.3.0/g' C:/astral/pubspec.yaml
           sed -i 's/path: \^1\.9\.1/path: ^1.9.0/g' C:/astral/pubspec.yaml
           sed -i 's/floor_generator: \^1\.5\.0/floor_generator: ^1.3.0/g' C:/astral/pubspec.yaml
@@ -80,6 +76,16 @@ jobs:
           sed -i 's/process_run: \^1\.2\.4/process_run: ^1.1.2/g' C:/astral/pubspec.yaml
           sed -i 's/sqflite: \^2\.4\.2/sqflite: ^2.2.8+4/g' C:/astral/pubspec.yaml
           sed -i 's/sdk: \^3.7.2/sdk: ">=3.5.0 <4.0.0"/' C:/astral/vpn_service_plugin/pubspec.yaml
+          cd C:/astral
+          flutter pub add flutter_rust_bridge@2.8.0
+          flutter pub get
+          flutter pub run flutter_rust_bridge:generate \
+             --rust-input rust/src/api/mod.rs \
+             --rust-output rust/src/frb_generated.rs \
+             --dart-output lib/src/rust/frb_generated.dart \
+             --dart-decl-output lib/src/rust/frb_generated.io.dart \
+             --dart-web-output lib/src/rust/frb_generated.web.dart \
+             --dart-simple-output lib/src/rust/api/simple.dart
           
       - name: 构建 Windows astral
         run: |
