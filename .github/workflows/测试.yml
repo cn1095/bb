@@ -49,13 +49,6 @@ jobs:
       - name: 克隆源码
         run: git clone -b "${{ env.tag }}" "https://github.com/${{ env.repo }}" C:\astral
 
-      - name: 安装 Rust 和设置 toolchain
-        run: |
-          rustup set auto-self-update disable
-          rustup install 1.77
-          rustup default 1.77
-          rustc --version
-
       - name: 配置 thunk-rs 依赖和 build.rs 文件
         shell: bash
         run: |
@@ -70,7 +63,7 @@ jobs:
           echo '}' >> "$build_path"
           cat $cargo_path
           cat $build_path
-            
+          sed -i 's/path: \^1.9.1/path: \^1.9.0/g' C:/astral/pubspec.yaml
       - name: 构建 Windows astral
         run: |
           #set WINVER=0x0601
