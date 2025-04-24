@@ -79,13 +79,6 @@ jobs:
           cd C:/astral
           echo "添加flutter_rust_bridge@2.8.0"
           cargo install flutter_rust_bridge_codegen --version 2.8.0
-          flutter_rust_bridge_codegen --help
-          echo "开始生成"
-          flutter_rust_bridge_codegen generate \
-             --rust-input crate::api::simple \
-             --rust-root rust/ \
-             --rust-output rust/src/frb_generated.rs \
-             --dart-output lib/src/rust/frb_generated.dart 
           
       - name: 构建 Windows astral
         run: |
@@ -95,6 +88,9 @@ jobs:
           set VERBOSE_SCRIPT=true
           
           cd C:\astral
+          echo "开始生成"
+          flutter_rust_bridge_codegen generate --rust-input crate::api::simple --rust-root C:\astral\rust\ --rust-output C:\astral\rust\src\frb_generated.rs --dart-output C:\astral\lib\src\rust\frb_generated.dart
+          echo "开始构建"
           flutter pub get
           flutter build windows --release 
           echo "构建完成，开始列出生成的文件"
