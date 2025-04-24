@@ -92,8 +92,8 @@ jobs:
           flutter_rust_bridge_codegen generate ^
            --rust-input crate::api::simple ^
            --rust-root rust ^
-           --rust-output rust/src/frb_generated.rs ^
-           --dart-output lib/src/rust/frb_generated.dart
+           --rust-output rust\src\frb_generated.rs ^
+           --dart-output lib\src\rust\frb_generated.dart
           echo "开始构建"
           flutter pub get
           flutter build windows --release 
