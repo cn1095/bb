@@ -78,7 +78,6 @@ jobs:
           sed -i 's/sdk: \^3.7.2/sdk: ">=3.5.0 <4.0.0"/' C:/astral/vpn_service_plugin/pubspec.yaml
           cd C:/astral
           echo "添加flutter_rust_bridge@2.8.0"
-          flutter pub add flutter_rust_bridge@2.8.0
           flutter pub get
           echo "开始生成"
           flutter pub run flutter_rust_bridge:generate \
