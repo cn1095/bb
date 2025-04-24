@@ -73,14 +73,14 @@ jobs:
             
       - name: 构建 Windows astral
         run: |
-          set WINVER=0x0601
+          #set WINVER=0x0601
           setx CARGO_TERM_VERBOSE true
           set CARGO_TERM_VERBOSE=true
           set VERBOSE_SCRIPT=true
           
           cd C:\astral
           flutter pub get
-          flutter build windows --release -v
+          flutter build windows --release 
           echo "构建完成，开始列出生成的文件"
           dir C:\astral\build\windows\x64\runner\Release
           Copy-Item -Path C:\astral\assets\dlls\* -Destination C:\astral\build\windows\x64\runner\Release -Recurse -Force
