@@ -79,6 +79,7 @@ jobs:
           cd C:/astral
           echo "添加flutter_rust_bridge@2.8.0"
           cargo install flutter_rust_bridge_codegen --version 2.8.0
+          flutter_rust_bridge_codegen --help
           echo "开始生成"
           flutter_rust_bridge_codegen generate \
              --rust-input rust/src/api/mod.rs \
