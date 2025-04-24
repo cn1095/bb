@@ -81,7 +81,7 @@ jobs:
           cargo install flutter_rust_bridge_codegen --version 2.8.0
           echo "开始生成"
           flutter_rust_bridge_codegen generate \
-            --rust-input "crate::api::simple" \
+            --rust-input "crate::api" \
             --rust-root "rust" \
             --rust-output "rust/src/frb_generated.rs" \
             --dart-output "lib/src/rust/frb_generated.dart"
