@@ -55,6 +55,17 @@ jobs:
           rustup install 1.77
           rustup default 1.77
           rustc --version
+
+      - name: 配置 thunk-rs 依赖和 build.rs 文件
+        run: |
+          echo.>> C:\astral\rust\Cargo.toml
+          echo [build-dependencies]>> C:\astral\rust\Cargo.toml
+          echo thunk-rs = { version = "0.3.3", features = ["win7"] }>> C:\astral\rust\Cargo.toml
+
+          echo fn main() {>> C:\astral\rust\build.rs
+          echo     // 配置 thunk-rs 来链接 Windows 7 兼容库，并自动设置链接参数>> C:\astral\rust\build.rs
+          echo     thunk::thunk();>> C:\astral\rust\build.rs
+          echo }>> C:\astral\rust\build.rs
           
       - name: 构建 Windows astral
         run: |
