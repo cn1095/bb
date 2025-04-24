@@ -57,28 +57,20 @@ jobs:
           rustc --version
 
       - name: 配置 thunk-rs 依赖和 build.rs 文件
-        shell: pwsh
+        shell: bash
         run: |
-          $cargoPath = "C:\astral\rust\Cargo.toml"
-          $buildScriptPath = "C:\astral\rust\build.rs"
-
-          # 检查是否已经有 build-dependencies，如果没有则添加
-          $cargoContent = Get-Content $cargoPath
-          if (-not ($cargoContent -match '\[build-dependencies\]')) {
-            Add-Content $cargoPath "`n[build-dependencies]"
-          }
-
-          # 添加 thunk-rs 依赖（防止重复）
-          if (-not ($cargoContent -match 'thunk-rs')) {
-            Add-Content $cargoPath 'thunk-rs = { version = "0.3.3", features = ["win7"] }'
-          }
-
-           # 写入 build.rs 文件（逐行写入）
-          Set-Content $buildScriptPath 'fn main() {'
-          Add-Content $buildScriptPath '    // 配置 thunk-rs 来链接 Windows 7 兼容库，并自动设置链接参数'
-          Add-Content $buildScriptPath '    thunk::thunk();'
-          Add-Content $buildScriptPath '}'
+          cargo_path="C:/astral/rust/Cargo.toml"
+          build_path="C:/astral/rust/build.rs"
+          echo "" >> "$cargo_path"
+          echo "[build-dependencies]" >> "$cargo_path"
+          echo 'thunk-rs = { version = "0.3.3", features = ["win7"] }' >> "$cargo_path"
           
+          echo 'fn main() {' >> "$build_path"
+          echo '   thunk::thunk();' >> "$build_path"
+          echo '}' >> "$build_path"
+          cat $cargo_path
+          cat $build_path
+            
       - name: 构建 Windows astral
         run: |
           set WINVER=0x0601
