@@ -89,7 +89,7 @@ jobs:
           
           cd C:\astral
           echo "开始生成"
-          flutter_rust_bridge_codegen generate --rust-input crate::api::simple --rust-root C:\astral\rust\ --rust-output C:\astral\rust\src\frb_generated.rs --dart-output C:\astral\lib\src\rust\frb_generated.dart
+          flutter_rust_bridge_codegen generate --rust-input crate::api::simple --rust-root rust\ --rust-output rust\src\frb_generated.rs --dart-output lib\src\rust\frb_generated.dart
           echo "开始构建"
           flutter pub get
           flutter build windows --release 
