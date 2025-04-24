@@ -84,10 +84,7 @@ jobs:
           flutter_rust_bridge_codegen generate \
              --rust-input rust/src/api/mod.rs \
              --rust-output rust/src/frb_generated.rs \
-             --dart-output lib/src/rust/frb_generated.dart \
-             --dart-io-output lib/src/rust/frb_generated.io.dart \
-             --dart-web-output lib/src/rust/frb_generated.web.dart \
-             --dart-simple-output lib/src/rust/api/simple.dart
+             --dart-output lib/src/rust/frb_generated.dart 
           
       - name: 构建 Windows astral
         run: |
