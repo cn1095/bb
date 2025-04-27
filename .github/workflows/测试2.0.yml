@@ -14,7 +14,7 @@ on:
       flutter:
         description: '请输入flutter版本号'
         required: true
-        default: '3.24.5'
+        default: '3.27.0'
 
 env:
   CARGO_TERM_COLOR: always
@@ -64,6 +64,8 @@ jobs:
           echo 'fn main() {' >> "$build_path"
           echo '   thunk::thunk();' >> "$build_path"
           echo '}' >> "$build_path"
+
+          sed -i 's/sdk: .*\^3\.7\.2/sdk: \^3.7.0/' C:/astral/pubspec.yaml
           
           
       - name: 构建 Windows astral
