@@ -1,0 +1,84 @@
+name: Build Flutter Engine (3.29.0)
+
+on: workflow_dispatch
+
+jobs:
+  build-engine:
+    runs-on: windows-2019
+
+    steps:
+      # 安装 Depot Tools 工具链
+      - name: 安装 Depot Tools
+        uses: newkdev/setup-depot-tools@v1.0.1
+
+      # 设置环境变量
+      - name: 设置环境变量
+        run: |
+          echo "DEPOT_TOOLS_WIN_TOOLCHAIN=0" >> $env:GITHUB_ENV
+          echo "GYP_MSVS_OVERRIDE_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise" >> $env:GITHUB_ENV
+          echo "WINDOWSSDKDIR=C:\Program Files (x86)\Windows Kits\10" >> $env:GITHUB_ENV
+
+      # 下载 Flutter 引擎源码并切换到 3.29.0
+      - name: 下载 Flutter 引擎
+        run: |
+          mkdir engine
+          cd engine
+
+          fetch flutter
+          git -C src/flutter checkout 3.29.0
+
+          # 修改源码，适配
+          $filePath = "src/flutter/shell/platform/windows/flutter_windows_engine.cc"
+          (Get-Content $filePath) -replace 'ClearCurrent', 'MakeCurrent' | Set-Content $filePath
+
+          $filePath = "src/flutter/fml/hex_codec.h"
+          (Get-Content $filePath | ForEach-Object { if ($_ -eq '#include <string_view>') {"#include <string>`n" + $_} else {$_}}) | Set-Content $filePath
+
+          git -C src/flutter status
+
+          # 同步依赖
+          gclient sync -D
+
+          # 应用必要的补丁
+          $filePath = "revert_to_gethostname.zip"
+          Invoke-WebRequest -Uri "https://dart-review.googlesource.com/changes/sdk~320620/revisions/2/patch?zip&path=runtime%2Fbin%2Fplatform_win.cc" -OutFile $filePath
+          Expand-Archive -Path $filePath -DestinationPath "."
+          git apply --directory="src/flutter/third_party/dart" 987dbe0.diff
+
+          $filePath = "0001-Revert-win-unwinding-Remove-Windows7-handling-of-unw.patch"
+          Invoke-WebRequest -Uri "https://github.com/rustdesk/engine/raw/refs/heads/main/0001-Revert-win-unwinding-Remove-Windows7-handling-of-unw.patch" -OutFile $filePath
+          git apply --directory="src/flutter/third_party/dart" $filePath
+
+          $filePath = "0001-revert-file_win.cc.patch"
+          Invoke-WebRequest -Uri "https://github.com/rustdesk/engine/raw/refs/heads/main/0001-revert-file_win.cc.patch" -OutFile $filePath
+          git apply --directory="src/flutter/third_party/dart" $filePath
+
+      # 编译 Flutter 引擎
+      - name: 编译 Flutter 引擎
+        run: |
+          cd engine/src
+          python .\flutter\tools\gn --runtime-mode=release --no-prebuilt-dart-sdk
+          ninja -C .\out\host_release
+
+      # 打包输出文件
+      - name: 打包构建结果
+        run: |
+          $outputPath = "${{ github.workspace }}\windows-x64-release.zip"
+          $filesToCompress = Get-ChildItem -Path .\engine\src\out\host_release\ | Where-Object { $_.Name -in @(
+            "flutter_windows.dll", "flutter_windows.dll.pdb", "flutter_windows.dll.exp", "flutter_windows.dll.lib",
+            "flutter_windows.h", "flutter_export.h", "flutter_messenger.h",
+            "flutter_plugin_registrar.h", "flutter_texture_registrar.h", "license.windows_flutter.md", "gen_snapshot.exe"
+          )}
+          $filesToCompressPaths = $filesToCompress.FullName
+          if ($filesToCompressPaths) {
+            Compress-Archive -Path $filesToCompressPaths -DestinationPath $outputPath
+          } else {
+            Write-Error "构建输出文件未找到！"
+          }
+
+      # 上传打包好的文件到 GitHub Actions Artifacts
+      - name: 上传打包文件到 Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64-release
+          path: windows-x64-release.zip
