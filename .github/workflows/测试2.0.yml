@@ -1,0 +1,89 @@
+name: 🪟 构建 astral
+
+on:
+   workflow_dispatch:
+    inputs:
+      repo:
+        description: '请输入astral源码仓库'
+        required: true
+        default: 'ldoubil/astral'
+      tag:
+        description: '请输入仓库分支或版本号'
+        required: true
+        default: '2.0.0'
+      flutter:
+        description: '请输入flutter版本号'
+        required: true
+        default: '3.24.5'
+
+env:
+  CARGO_TERM_COLOR: always
+  TZ: Asia/Shanghai
+  repo: "${{ github.event.inputs.repo }}"
+  tag: "${{ github.event.inputs.tag }}"
+
+jobs:
+  build:
+    runs-on: windows-latest # 使用 Windows 机器运行任务
+    steps:   
+      - name: 设置Flutter环境
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: ${{ github.event.inputs.flutter }}
+          
+      - name: 替换 Flutter 引擎为支持 Windows 7 的版本
+        shell: pwsh
+        run: |
+          flutter doctor -v
+          flutter precache --windows
+          Invoke-WebRequest -Uri https://github.com/lmq8267/Toolchain/releases/download/flutter-3.24.5/windows-x64-release.zip -OutFile windows-x64-release.zip
+          Expand-Archive -Path windows-x64-release.zip -DestinationPath windows-x64-release
+          Copy-Item -Path windows-x64-release/* -Destination "C:/hostedtoolcache/windows/flutter/stable-${{ github.event.inputs.flutter }}-x64/bin/cache/artifacts/engine/windows-x64-release/" -Recurse -Force
+          Invoke-WebRequest -Uri https://github.com/lmq8267/Toolchain/releases/download/flutter-3.24.5/flutter_3.24.4_dropdown_menu_enableFilter.diff -OutFile flutter_3.24.4_dropdown_menu_enableFilter.diff
+          
+      - name: 打补丁以启用 Dropdown Menu 过滤支持
+        shell: bash
+        run: |
+          cp flutter_3.24.4_dropdown_menu_enableFilter.diff $(dirname $(dirname $(which flutter)))
+          cd $(dirname $(dirname $(which flutter)))
+          [[ "${{ env.FLUTTER_VERSION }}" == "3.24.5" ]] && git apply flutter_3.24.4_dropdown_menu_enableFilter.diff || true
+
+      - name: 克隆源码
+        run: git clone -b "${{ env.tag }}" "https://github.com/${{ env.repo }}" C:\astral
+
+      - name: 配置 thunk-rs 依赖和 build.rs 文件并降级依赖版本
+        shell: bash
+        run: |
+          cargo_path="C:/astral/rust/Cargo.toml"
+          build_path="C:/astral/rust/build.rs"
+          echo "" >> "$cargo_path"
+          echo "[build-dependencies]" >> "$cargo_path"
+          echo 'thunk-rs = { version = "0.3.3", features = ["win7"] }' >> "$cargo_path"
+          
+          echo 'fn main() {' >> "$build_path"
+          echo '   thunk::thunk();' >> "$build_path"
+          echo '}' >> "$build_path"
+          sed -i 's/if (Platform.isWindows) _initFirewallStatus();/\/\/ if (Platform.isWindows) _initFirewallStatus();/g' C:/astral/lib/screens/front.dart
+
+          
+      - name: 构建 Windows astral
+        run: |
+          #set WINVER=0x0601
+          setx CARGO_TERM_VERBOSE true
+          set CARGO_TERM_VERBOSE=true
+          set VERBOSE_SCRIPT=true
+          
+          cd C:\astral
+          flutter pub get
+          flutter build windows --release 
+          echo "构建完成，开始列出生成的文件"
+          dir C:\astral\build\windows\x64\runner\Release -v
+          Copy-Item -Path C:\astral\assets\dlls\* -Destination C:\astral\build\windows\x64\runner\Release -Recurse -Force
+          
+      - name: 上传
+        uses: actions/upload-artifact@main
+        if: always()
+        with:
+          name: astral-Windows
+          path: C:\astral\build\windows\x64\runner\Release\*
