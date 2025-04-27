@@ -72,7 +72,7 @@ jobs:
           sed -i 's/device_info_plus: \^11\.4\.0/device_info_plus: 11.2.0/' C:/astral/pubspec.yaml
           sed -i 's/dart_jsonwebtoken: \^3\.2\.0/dart_jsonwebtoken: ^2.17.0/' C:/astral/pubspec.yaml
           cd C:/astral
-          rm -rf lib/src
+          rm -rf lib/src/rust/*
           rm rust/src/frb_generated.rs
           echo "添加flutter_rust_bridge@2.8.0"
           cargo install flutter_rust_bridge_codegen --version 2.8.0
