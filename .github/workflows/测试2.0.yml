@@ -69,6 +69,7 @@ jobs:
           sed -i 's/flutter_rust_bridge: 2\.9\.0/flutter_rust_bridge: 2.8.0/g' C:/astral/pubspec.yaml
           sed -i 's/flutter_rust_bridge = "=2.9.0"/flutter_rust_bridge = "=2.8.0"/g' C:/astral/rust/Cargo.toml
           sed -i 's/build_runner: \^2\.4\.13/build_runner: ^2.3.0/g' C:/astral/pubspec.yaml
+          sed -i 's/device_info_plus: \^11\.4\.0/device_info_plus: 11.2.0/' C:/astral/pubspec.yaml
           cd C:/astral
           rm -rf lib/src
           rm rust/src/frb_generated.rs
