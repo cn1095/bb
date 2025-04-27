@@ -64,8 +64,7 @@ jobs:
           echo 'fn main() {' >> "$build_path"
           echo '   thunk::thunk();' >> "$build_path"
           echo '}' >> "$build_path"
-          sed -i 's/if (Platform.isWindows) _initFirewallStatus();/\/\/ if (Platform.isWindows) _initFirewallStatus();/g' C:/astral/lib/screens/front.dart
-
+          
           
       - name: 构建 Windows astral
         run: |
