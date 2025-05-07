@@ -169,7 +169,7 @@ jobs:
      - name: 编译 Bandwidthd
        run: |
          export CROSS_COMPILE=${URL}-
-         sed -i 's/-lpng/-lpng -l/' configure
+         sed -i 's/-lpng/-lpng -lz/' configure
          ./configure --host=${TARGET} --disable-shared --enable-static \
            --prefix=/opt/Bandwidthd \
            ac_cv_file__sw_lib=no \
