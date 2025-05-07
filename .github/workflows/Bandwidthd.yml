@@ -54,8 +54,8 @@ jobs:
     steps:
      - name: Checkout code
        uses: actions/checkout@v4
-       with:
-         repository: 'NethServer/bandwidthd'
+       #with:
+         #repository: 'NethServer/bandwidthd'
        
      - name: 下载linux-musl-gcc
        uses: lmq8267/dl-musl@main
@@ -169,10 +169,9 @@ jobs:
      - name: 编译 Bandwidthd
        run: |
          export CROSS_COMPILE=${URL}-
-         aclocal || true
-         autoconf || true
-         autoheader || true
-         automake --add-missing || true
+         wget https://github.com/NethServer/bandwidthd/archive/refs/tags/2.0.1-35.tar.gz
+         tar xf 2.0.1-35.tar.gz
+         cd 2.0.1-35
          sed -i 's/-lpng/-lpng -lz/' configure
          ./configure --host=${TARGET} --disable-shared --enable-static \
            --prefix=/opt/Bandwidthd \
@@ -199,6 +198,6 @@ jobs:
        with:
         name: Bandwidthd-${{ matrix.target }}
         path: |
-           bandwidthd-${{ matrix.target }}
-           etc/bandwidthd.conf
+           2.0.1-35/bandwidthd-${{ matrix.target }}
+           2.0.1-35/etc/bandwidthd.conf
         
