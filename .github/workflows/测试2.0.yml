@@ -55,7 +55,7 @@ jobs:
       - name: 缓存 bridge_codegen
         uses: actions/cache@v4
         with:
-          path: ~/.cargo/bin
+          path: C:\Users\runneradmin\.cargo\bin
           key: flutter-rust-bridge-codegen-2.8.0
 
       - name: 安装 flutter_rust_bridge_codegen@2.8.0
