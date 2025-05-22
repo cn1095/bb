@@ -52,21 +52,29 @@ jobs:
       - name: 克隆源码
         run: git clone -b "${{ env.tag }}" "https://github.com/${{ env.repo }}" C:\astral
 
-      - name: 缓存 bridge_codegen
+      - name: 缓存 Cargo 工具（flutter_rust_bridge_codegen & cargo-expand）
         uses: actions/cache@v4
         with:
-          path: C:\Users\runneradmin\.cargo\bin
-          key: flutter-rust-bridge-codegen-2.8.0
+          path: |
+            C:\Users\runneradmin\.cargo\bin
+            C:\Users\runneradmin\.cargo\registry
+            C:\Users\runneradmin\.cargo\git
+          key: rust-windows-tools-cache-v1
 
-      - name: 安装 flutter_rust_bridge_codegen@2.8.0
-        shell: bash
+      - name: 安装 flutter_rust_bridge_codegen 和 cargo-expand
+        shell: pwsh
         run: |
-          if ! command -v flutter_rust_bridge_codegen &> /dev/null; then
-            echo "未找到 flutter_rust_bridge_codegen，开始安装"
+          $Env:CARGO_HOME = "C:\Users\runneradmin\.cargo"   
+
+          if (-not (Test-Path "$Env:CARGO_HOME\bin\flutter_rust_bridge_codegen.exe")) {
+            Write-Host "安装 flutter_rust_bridge_codegen"
             cargo install flutter_rust_bridge_codegen --version 2.8.0
-          else
-            echo "已缓存 flutter_rust_bridge_codegen，跳过安装"
-          fi
+          }
+
+          if (-not (Test-Path "$Env:CARGO_HOME\bin\cargo-expand.exe")) {
+            Write-Host "安装 cargo-expand"
+            cargo install cargo-expand
+          }
 
       - name: 配置 thunk-rs 依赖和 build.rs 文件并降级依赖版本
         shell: bash
