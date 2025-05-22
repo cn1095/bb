@@ -19,8 +19,8 @@ on:
 env:
   CARGO_TERM_COLOR: always
   TZ: Asia/Shanghai
-  repo: "${{ github.event.inputs.repo || cn1095/astral0 }}"
-  tag: "${{ github.event.inputs.tag || main }}"
+  repo: "${{ github.event.inputs.repo }}"
+  tag: "${{ github.event.inputs.tag }}"
 
 jobs:
   build:
