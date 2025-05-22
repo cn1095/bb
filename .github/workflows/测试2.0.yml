@@ -96,7 +96,6 @@ jobs:
           flutter_rust_bridge_codegen generate
           
       - name: 构建 Windows astral
-        if: github.repository_owner == 'l'
         run: |
           set WINVER=0x0601
           setx CARGO_TERM_VERBOSE true
