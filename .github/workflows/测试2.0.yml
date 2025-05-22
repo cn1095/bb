@@ -52,6 +52,22 @@ jobs:
       - name: 克隆源码
         run: git clone -b "${{ env.tag }}" "https://github.com/${{ env.repo }}" C:\astral
 
+      - name: 缓存 bridge_codegen
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin
+          key: flutter-rust-bridge-codegen-2.8.0
+
+      - name: 安装 flutter_rust_bridge_codegen@2.8.0
+        shell: bash
+        run: |
+          if ! command -v flutter_rust_bridge_codegen &> /dev/null; then
+            echo "未找到 flutter_rust_bridge_codegen，开始安装"
+            cargo install flutter_rust_bridge_codegen --version 2.8.0
+          else
+            echo "已缓存 flutter_rust_bridge_codegen，跳过安装"
+          fi
+
       - name: 配置 thunk-rs 依赖和 build.rs 文件并降级依赖版本
         shell: bash
         run: |
@@ -68,9 +84,7 @@ jobs:
           cd C:/astral
           rm -rf lib/src/rust/*
           rm rust/src/frb_generated.rs
-          echo "添加flutter_rust_bridge@2.8.0"
-          cargo install flutter_rust_bridge_codegen --version 2.8.0
-          echo "开始生成"
+          echo "开始生成flutter_rust_bridge@2.8.0"
           flutter_rust_bridge_codegen generate
           
       - name: 构建 Windows astral
