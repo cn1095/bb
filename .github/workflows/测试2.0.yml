@@ -76,19 +76,9 @@ jobs:
             cargo install cargo-expand
           }
 
-      - name: 配置 thunk-rs 依赖和 build.rs 文件并降级依赖版本
+      - name: 生成flutter_rust_bridge@2.8.0
         shell: bash
         run: |
-          cargo_path="C:/astral/rust/Cargo.toml"
-          build_path="C:/astral/rust/build.rs"
-          echo "" >> "$cargo_path"
-          echo "[build-dependencies]" >> "$cargo_path"
-          echo 'thunk-rs = { version = "0.3.3", features = ["win7"] }' >> "$cargo_path"
-          
-          echo 'fn main() {' >> "$build_path"
-          echo '   thunk::thunk();' >> "$build_path"
-          echo '}' >> "$build_path"
-          
           cd C:/astral
           rm -rf lib/src/rust/*
           rm rust/src/frb_generated.rs
@@ -107,7 +97,7 @@ jobs:
           flutter build windows --release -v
           echo "构建完成，开始列出生成的文件"
           dir C:\astral\build\windows\x64\runner\Release 
-          Copy-Item -Path C:\astral\assets\dlls\* -Destination C:\astral\build\windows\x64\runner\Release -Recurse -Force
+          Copy-Item -Path C:\astral\dlls\* -Destination C:\astral\build\windows\x64\runner\Release -Recurse -Force
           
       - name: 上传
         uses: actions/upload-artifact@main
