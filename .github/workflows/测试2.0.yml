@@ -24,7 +24,7 @@ env:
 
 jobs:
   build:
-    runs-on: windows-latest # 使用 Windows 机器运行任务
+    runs-on: windows-2022 # 使用 Windows 机器运行任务
     steps:   
       - name: 设置Flutter环境
         uses: subosito/flutter-action@v2
