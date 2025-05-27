@@ -9,7 +9,7 @@ jobs:
     runs-on: macos-latest  # 中文：在 macOS 最新环境上运行
     strategy:
       matrix:
-        target: [aarch64-apple-ios, x86_64-apple-ios]  # 中文：支持真机和模拟器架构
+        target: [aarch64-apple-ios]  # 中文：支持真机
     steps:
       - name: Checkout 仓库
         uses: actions/checkout@v4    # 中文：拉取代码
