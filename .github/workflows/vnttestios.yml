@@ -37,7 +37,7 @@ jobs:
           cargo lipo --release -v            # 中文：编译所有目标并生成通用静态库
 
       - name: 上传构建产物
-        uses: actions/upload-artifact@v3      # 中文：将产物上传以供后续步骤下载
+        uses: actions/upload-artifact@v4      # 中文：将产物上传以供后续步骤下载
         with:
           name: ios-libs                       # 中文：产物名称
           path: target/universal/release       # 中文：通用库输出目录
