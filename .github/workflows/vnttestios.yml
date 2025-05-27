@@ -2,7 +2,8 @@ name: vnt iOS Build CI
 
 on:
   workflow_dispatch:
-
+env:
+  CARGO_TERM_COLOR: always
 jobs:
   build-ios:
     name: 构建 iOS 静态库
