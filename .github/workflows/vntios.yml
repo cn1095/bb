@@ -35,15 +35,18 @@ jobs:
 
       - run: flutter build ios --release --no-codesign -v
 
+      - run: mkdir Payload
+        working-directory: build/ios/iphoneos
+
+      - run: mv Runner.app/ Payload
+        working-directory: build/ios/iphoneos
+
       - name: Zip output
-        run: |
-          cd ios
-          mkdir -p Payload
-          cp -r build/Release-iphoneos/Runner.app Payload/
-          zip -qq -r -9 vntAPP.ipa Payload
+        run: zip -qq -r -9 vntAPP.ipa Payload
+        working-directory: build/ios/iphoneos
 
       - name: Upload binaries to release
         uses: actions/upload-artifact@v4
         with:
           name: vntAPP-ios
-          path: ios//vntAPP.ipa
+          path: build/ios/iphoneos/vntAPP.ipa
