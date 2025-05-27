@@ -22,8 +22,7 @@ jobs:
         with:
           toolchain: stable           # 中文：使用 stable 版本
           override: true              # 中文：覆盖本地安装
-          profile: minimal            # 中文：仅安装必要组件
-          components: rustfmt,lld     # 中文：安装 rustfmt 和 lld 链接器
+          components: rust-src        # 中文：安装 rust-src
 
       - name: 添加 iOS 目标
         run: |
