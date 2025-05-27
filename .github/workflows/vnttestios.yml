@@ -33,8 +33,13 @@ jobs:
 
       - name: 构建通用 iOS 库
         run: |
-          export CARGO_TERM_COLOR=always
           cd rust
+          rm -rf .cargo/config
+          cat >>./.cargo/config <<EOF
+            [target.aarch64-apple-ios]
+            rustflags = ["-C", "link-arg=-miphoneos-version-min=12.0"]
+          EOF
+          export IPHONEOS_DEPLOYMENT_TARGET=10.0
           cargo lipo --release -v            # 中文：编译所有目标并生成通用静态库
 
       - name: 上传构建产物
