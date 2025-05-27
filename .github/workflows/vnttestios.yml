@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4    # 中文：拉取代码
         with:
           repository: 'cn1095/VntApp'
-          ref: 'Location'
+          ref: 'ios'
 
       - name: 安装 Rust 工具链
         uses: actions-rs/toolchain@v1  # 中文：使用 actions-rs 管理 Rust
