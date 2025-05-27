@@ -13,6 +13,16 @@ jobs:
           repository: 'cn1095/VntApp'
           ref: 'ios'
 
+      - name: 安装 Rust 工具链
+        uses: actions-rs/toolchain@v1  # 中文：使用 actions-rs 管理 Rust
+        with:
+          toolchain: stable           # 中文：使用 stable 版本
+          override: true              # 中文：覆盖本地安装
+          components: rust-src        # 中文：安装 rust-src
+
+      - name: 添加 iOS 目标
+        run: rustup target add aarch64-apple-ios  # 中文：添加 iOS 交叉编译目标
+
       - uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
