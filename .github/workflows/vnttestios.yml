@@ -1,0 +1,44 @@
+name: vnt iOS Build CI
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    name: 构建 iOS 静态库
+    runs-on: macos-latest  # 中文：在 macOS 最新环境上运行
+    strategy:
+      matrix:
+        target: [aarch64-apple-ios, x86_64-apple-ios]  # 中文：支持真机和模拟器架构
+    steps:
+      - name: Checkout 仓库
+        uses: actions/checkout@v4    # 中文：拉取代码
+        with:
+          repository: 'cn1095/vnt'
+          ref: '1.2.16'
+
+      - name: 安装 Rust 工具链
+        uses: actions-rs/toolchain@v1  # 中文：使用 actions-rs 管理 Rust
+        with:
+          toolchain: stable           # 中文：使用 stable 版本
+          override: true              # 中文：覆盖本地安装
+          profile: minimal            # 中文：仅安装必要组件
+          components: rustfmt,lld     # 中文：安装 rustfmt 和 lld 链接器
+
+      - name: 添加 iOS 目标
+        run: |
+          rustup target add ${{ matrix.target }}  # 中文：添加 iOS 交叉编译目标
+
+      - name: 安装 cargo-lipo
+        run: |
+          cargo install cargo-lipo             # 中文：安装 cargo-lipo 用于创建通用库
+
+      - name: 构建通用 iOS 库
+        run: |
+          cargo lipo --release -v            # 中文：编译所有目标并生成通用静态库
+
+      - name: 上传构建产物
+        uses: actions/upload-artifact@v3      # 中文：将产物上传以供后续步骤下载
+        with:
+          name: ios-libs                       # 中文：产物名称
+          path: target/universal/release       # 中文：通用库输出目录
