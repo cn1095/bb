@@ -11,11 +11,6 @@ on:
         description: '请输入仓库的分支或版本号，默认main分支'
         required: true
         default: 'main'
-      scp:
-        description: '上传静态网页文件到服务器'
-        required: true
-        default: false
-        type: boolean
 env:
   branch: ${{ github.event.inputs.branch || 'main' }} # 为 branch 设置默认值
   repo: ${{ github.event.inputs.repo || 'cn1095/EasyTier' }} # 为 repo 设置默认值
@@ -45,6 +40,8 @@ jobs:
           pnpm -r add terser -D
           pnpm -r install
           pnpm -r build
+          mv -f easytier-web/frontend/dist/index.html easytier-web/frontend/dist/配置生成器.html
+          rm -rf easytier-web/frontend/dist/api_meta.js || true
       - name: 上传文件
         uses: actions/upload-pages-artifact@v3
         with:
