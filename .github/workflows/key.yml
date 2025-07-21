@@ -32,6 +32,7 @@ jobs:
 
           openssl ecparam -name prime192v1 -genkey -noout -out prikey.pem
 
-          openssl ec -in prikey.pem -outform DER -out prikey.der -traditional
+          openssl ec -in prikey.pem -outform DER -out prikey.der
+
           stat -c %s prikey.der
          
