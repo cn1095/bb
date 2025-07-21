@@ -1,0 +1,37 @@
+name: 测试 Key
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generate-key:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install OpenSSL
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y build-essential wget tar
+
+          wget https://www.openssl.org/source/openssl-1.1.1u.tar.gz
+          tar xzf openssl-1.1.1u.tar.gz
+          cd openssl-1.1.1u
+          ./config --prefix=$HOME/openssl-111u no-shared
+          make -j$(nproc)
+          make install_sw
+          
+          echo "$HOME/openssl-111u/bin" >> $GITHUB_PATH
+          echo "OPENSSL_CONF=" >> $GITHUB_ENV 
+
+      - name: Generate EC Key Pair
+        run: |
+          openssl version  
+
+          openssl ecparam -name prime192v1 -genkey -noout -out prikey.pem
+
+          openssl ec -in prikey.pem -outform DER -out prikey.der -traditional
+          stat -c %s prikey.der
+         
