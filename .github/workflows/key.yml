@@ -8,23 +8,49 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: 编译安装 OpenSSL 
+      - name: 安装 Python 和依赖库
         run: |
-          wget https://www.openssl.org/source/old/1.0.2/openssl-1.0.2u.tar.gz
-          tar xzf openssl-1.0.2u.tar.gz
-          cd openssl-1.0.2u
-          ./config no-shared --prefix=$HOME/openssl-1.0.2u
-          make -j$(nproc)
-          make install_sw
-          echo "$HOME/openssl-1.0.2u/bin" >> $GITHUB_PATH
+          python3 -m venv venv
+          source venv/bin/activate
+          python -m pip install --upgrade pip
+          pip install cryptography
 
-      - name: 生成 
+      - name: 生成 EC 密钥对并输出静态字节数组
         run: |
-          openssl version
-          openssl ecparam -name prime192v1 -genkey -noout -out prikey.pem
-          openssl ec -in prikey.pem -outform DER -out prikey.der
-          stat -c %s prikey.der
+          source venv/bin/activate
+          python3 - << 'EOF' > key_output.h
+          from cryptography.hazmat.primitives.asymmetric import ec
+          from cryptography.hazmat.primitives import serialization
+
+          def print_c_array(name, data):
+              hex_bytes = ','.join(f'0x{b:02x}' for b in data)
+              print(f"const unsigned char {name}[{len(data)}] = {{\n{hex_bytes}\n}};\n")
+              print(f"// 下面是 {name} 每个字节的 static 变量")
+              for i, b in enumerate(data):
+                  print(f"static unsigned char {name}_byte{i} = 0x{b:02x};")
+              print(f"\n// 总字节数: {len(data)}\n")
+
+          def main():
+              private_key = ec.generate_private_key(ec.SECP192R1())
+              der_private = private_key.private_bytes(
+                  encoding=serialization.Encoding.DER,
+                  format=serialization.PrivateFormat.TraditionalOpenSSL,
+                  encryption_algorithm=serialization.NoEncryption()
+              )
+              print(f"// 私钥长度: {len(der_private)} 字节\n")
+              print_c_array("g_prikey", der_private)
+
+              pub_bytes = private_key.public_key().public_bytes(
+                  encoding=serialization.Encoding.X962,
+                  format=serialization.PublicFormat.UncompressedPoint
+              )
+              print(f"// 公钥长度: {len(pub_bytes)} 字节\n")
+              print_c_array("g_pkey_moi", pub_bytes)
+
+          if __name__ == '__main__':
+              main()
+          EOF
+
+      - name: 展示生成内容
+        run: cat key_output.h
          
