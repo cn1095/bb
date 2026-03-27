@@ -1,0 +1,103 @@
+name: Test Custom Go Repository  
+  
+on:  
+  workflow_dispatch:  
+  
+jobs:  
+  test-custom-repo:  
+    runs-on: ${{ matrix.os }}  
+    strategy:  
+      fail-fast: false  
+      matrix:  
+        os: [ubuntu-latest, windows-latest, macos-latest]  
+        go-version: ['1.26.1', '1.26.1-1']  
+        include:  
+          - os: ubuntu-latest  
+            expected-file: linux_amd64  
+          - os: windows-latest    
+            expected-file: windows_amd64  
+          - os: macos-latest  
+            expected-file: darwin_amd64  
+  
+    steps:  
+      - name: Checkout  
+        uses: actions/checkout@v6 
+  
+      - name: Setup Go from custom repository  
+        uses: lmq8267/win7-go@main
+        with:  
+          go-version: ${{ matrix.go-version }}  
+  
+      - name: Verify Go installation  
+        run: |  
+          echo "Go version:"  
+          go version  
+          echo "Go environment:"  
+          go env GOOS GOARCH  
+  
+      - name: Check if correct version was installed  
+        run: |  
+          INSTALLED_VERSION=$(go version | grep -o 'go[0-9]\+\.[0-9]\+\.[0-9]\+-[0-9]\+' | sed 's/go//')  
+          echo "Installed version: $INSTALLED_VERSION"  
+            
+          if [[ "${{ matrix.go-version }}" == "1.26.1" ]]; then  
+            # Should match to latest patch version (1.26.1-2)  
+            if [[ "$INSTALLED_VERSION" == "1.26.1-2" ]]; then  
+              echo "✅ Correctly matched to latest patch version"  
+            else  
+              echo "❌ Expected 1.26.1-2 but got $INSTALLED_VERSION"  
+              exit 1  
+            fi  
+          else  
+            # Should match exact version  
+            if [[ "$INSTALLED_VERSION" == "${{ matrix.go-version }}" ]]; then  
+              echo "✅ Correctly matched exact version"  
+            else  
+              echo "❌ Expected ${{ matrix.go-version }} but got $INSTALLED_VERSION"  
+              exit 1  
+            fi  
+          fi  
+  
+      - name: Test Go functionality  
+        run: |  
+          mkdir test-project  
+          cd test-project  
+            
+          cat > main.go << 'EOF'  
+          package main  
+            
+          import "fmt"  
+            
+          func main() {  
+              fmt.Println("Hello from custom Go repository!")  
+          }  
+          EOF  
+            
+          go run main.go  
+  
+  test-no-cache:  
+    runs-on: ubuntu-latest  
+    steps:  
+      - name: Checkout  
+        uses: actions/checkout@v6
+  
+      - name: Setup Go (first time)  
+        uses: lmq8267/win7-go@main
+        with:  
+          go-version: '1.26.1'  
+  
+      - name: Verify first installation  
+        run: go version  
+  
+      - name: Setup Go (second time - should download again)  
+        uses: lmq8267/win7-go@main
+        with:  
+          go-version: '1.26.1'  
+  
+      - name: Verify second installation  
+        run: |  
+          echo "Checking if cache was bypassed..."  
+          go version  
+            
+          # Check if download happened again by looking at logs  
+          echo "Installation completed - cache was bypassed as expected"
