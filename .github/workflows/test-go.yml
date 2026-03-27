@@ -10,7 +10,7 @@ jobs:
       fail-fast: false  
       matrix:  
         os: [ubuntu-latest, windows-latest, macos-latest]  
-        go-version: ['1.26.1', '1.26.1-1']  
+        go-version: ['1.25.7', '1.25.7-1']  
         include:  
           - os: ubuntu-latest  
             expected-file: linux_amd64  
