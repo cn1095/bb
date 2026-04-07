@@ -40,7 +40,7 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            IPHONEOS_DEPLOYMENT_TARGET=14.0
+            IPHONEOS_DEPLOYMENT_TARGET=17.0
 
       - name: 📁 查找 .app
         run: |
