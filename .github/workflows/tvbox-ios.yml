@@ -16,6 +16,17 @@ jobs:
       - name: 🛠 安装 XcodeGen
         run: brew install xcodegen
 
+      - name: 🛠 修改 project.yml
+        run: |
+          echo "修改 deploymentTarget → 17.0"
+          sed -i '' 's/deploymentTarget: ".*"/deploymentTarget: "17.0"/g' project.yml
+
+          echo "关闭自动签名"
+          sed -i '' 's/CODE_SIGN_STYLE: Automatic/CODE_SIGN_STYLE: Manual/g' project.yml
+
+          echo "禁用 Catalyst（避免干扰）"
+          sed -i '' 's/SUPPORTS_MACCATALYST: YES/SUPPORTS_MACCATALYST: NO/g' project.yml || true
+
       - name: ⚙️ 生成 Xcode 工程
         run: xcodegen generate
 
