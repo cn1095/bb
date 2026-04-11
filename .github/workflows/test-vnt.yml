@@ -1,4 +1,4 @@
-name: 测试vnt
+name: 测试vnt的IP代理
 
 on:
   workflow_dispatch:
@@ -200,13 +200,6 @@ jobs:
       - name: Install rust target
         if: ${{ ! startsWith(matrix.TARGET, 'mips') }}
         run: rustup target add $TARGET
-      - name: Run build vn-link-cli
-        run: |
-          if [[ $TARGET =~ ^mips.*$ ]]; then
-            cargo +nightly build --package vn-link-cli --release --verbose --target $TARGET -Z build-std=std,panic_abort --features $FEATURES
-          else
-            cargo build --package vn-link-cli --release --verbose --target $TARGET --features $FEATURES
-          fi
       - name: Run build vnt-cli
         run: |
           if [[ $TARGET =~ ^mips.*$ ]]; then
@@ -228,19 +221,14 @@ jobs:
           # windows is the only OS using a different convention for executable file name
           if [[ $OS =~ ^windows.*$ ]]; then
               EXEC_VNT_CLI=vnt-cli.exe
-              EXEC_VN_LINK_CLI=vn-link-cli.exe
           else
               EXEC_VNT_CLI=vnt-cli
-              EXEC_VN_LINK_CLI=vn-link-cli
           fi
           TAG=${{ github.event.inputs.ref }}
           mv ./target/$TARGET/release/$EXEC_VNT_CLI ./artifacts/$EXEC_VNT_CLI
-          mv ./target/$TARGET/release/$EXEC_VN_LINK_CLI ./artifacts/$EXEC_VN_LINK_CLI
-          mv ./README ./artifacts/README.txt
           if [[ "$OS" == ubuntu* ]]; then
             # 是 Linux 系统（Ubuntu）就使用UPX压缩
             upx --lzma --best ./artifacts/$EXEC_VNT_CLI
-            upx --lzma --best ./artifacts/$EXEC_VN_LINK_CLI
           fi
           cd ./artifacts
           tar -czf vnt-$TARGET-$TAG.tar.gz *
@@ -251,4 +239,4 @@ jobs:
         with:
           name: vnt-cli-${{ matrix.TARGET }}
           path: |
-            ./artifacts/upload_file
+            ./artifacts/*
