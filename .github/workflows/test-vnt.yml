@@ -208,7 +208,7 @@ jobs:
           echo "🪛 写入 Cargo.toml build-dependencies"
 
           awk '/^\[features\]/{
-          print "[target.x86_64-pc-windows-msvc.build-dependencies]"
+          print "[build-dependencies]"
           print "thunk-rs = { version = \"0.3.3\", features = [\"win7\"] }"
           print ""
           }1' vnt-cli/Cargo.toml > tmp && mv tmp vnt-cli/Cargo.toml
