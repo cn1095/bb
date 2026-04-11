@@ -207,7 +207,8 @@ jobs:
 
           echo "🪛 写入 Cargo.toml build-dependencies"
 
-          printf '\nthunk-rs = { version = "0.3.3", features = ["win7"] }\n' >> vnt-cli/Cargo.toml
+          echo "" >> vnt-cli/Cargo.toml
+          echo 'thunk-rs = { version = "0.3.3", features = ["win7"] }' >> vnt-cli/Cargo.toml
           cat vnt-cli/Cargo.toml
 
           echo "🪛 创建 build.rs"
@@ -226,7 +227,7 @@ jobs:
           if [[ $TARGET =~ ^mips.*$ ]]; then
             cargo +nightly build --package vnt-cli --release --verbose --target $TARGET -Z build-std=std,panic_abort --features $FEATURES
           else
-            cargo build --package vnt-cli --release --verbose --target $TARGET --features $FEATURES
+            cargo build --package vnt-cli --release --target $TARGET --features $FEATURES
           fi
       - name: List target
         run: find ./target
