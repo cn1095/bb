@@ -207,19 +207,13 @@ jobs:
 
           echo "🪛 写入 Cargo.toml build-dependencies"
 
-          awk '/^\[features\]/{
-          print "[build-dependencies]"
-          print "thunk-rs = { version = \"0.3.3\", features = [\"win7\"] }"
-          print ""
-          }1' vnt-cli/Cargo.toml > tmp && mv tmp vnt-cli/Cargo.toml
+          sed -i '/^\[build-dependencies\]/a thunk-rs = { version = "0.3.3", features = ["win7"] }' vnt-cli/Cargo.toml
+          cat vnt-cli/Cargo.toml
 
           echo "🪛 创建 build.rs"
 
           echo "fn main() {" > vnt-cli/build.rs
-          echo "    #[cfg(windows)]" >> vnt-cli/build.rs
-          echo "    {" >> vnt-cli/build.rs
           echo "        thunk_rs::thunk();" >> vnt-cli/build.rs
-          echo "    }" >> vnt-cli/build.rs
           echo "}" >> vnt-cli/build.rs
 
           echo "✅ thunk-rs 注入完成"
