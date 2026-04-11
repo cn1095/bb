@@ -200,6 +200,27 @@ jobs:
       - name: Install rust target
         if: ${{ ! startsWith(matrix.TARGET, 'mips') }}
         run: rustup target add $TARGET
+      - name: Windows7 兼容 thunk-rs 注入（echo方式）
+        if: matrix.TARGET == 'x86_64-pc-windows-msvc'
+        run: |
+          set -e
+
+          echo "🪛 写入 Cargo.toml build-dependencies"
+
+          echo "" >> vnt-cli/Cargo.toml
+          echo "[target.x86_64-pc-windows-msvc.build-dependencies]" >> vnt-cli/Cargo.toml
+          echo "thunk-rs = { version = \"0.3.3\", features = [\"win7\"] }" >> vnt-cli/Cargo.toml
+
+          echo "🪛 创建 build.rs"
+
+          echo "fn main() {" > vnt-cli/build.rs
+          echo "    #[cfg(windows)]" >> vnt-cli/build.rs
+          echo "    {" >> vnt-cli/build.rs
+          echo "        thunk_rs::thunk();" >> vnt-cli/build.rs
+          echo "    }" >> vnt-cli/build.rs
+          echo "}" >> vnt-cli/build.rs
+
+          echo "✅ thunk-rs 注入完成"
       - name: Run build vnt-cli
         run: |
           if [[ $TARGET =~ ^mips.*$ ]]; then
