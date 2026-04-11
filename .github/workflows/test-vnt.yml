@@ -207,8 +207,11 @@ jobs:
 
           echo "🪛 写入 Cargo.toml build-dependencies"
 
-          printf '\n[target."cfg(windows)".build-dependencies]\nthunk-rs = { version = "0.3.3", features = ["win7"] }\n' >> vnt-cli/Cargo.toml
+          printf '\n\n[target."cfg(windows)".build-dependencies]\nthunk-rs = { version = "0.3.3", features = ["win7"] }\n\n' >> vnt-cli/Cargo.toml
           cat vnt-cli/Cargo.toml
+
+          printf '\n\n[target."cfg(windows)".build-dependencies]\nthunk-rs = { version = "0.3.3", features = ["win7"] }\n\n' >> vnt/Cargo.toml
+          cat vnt/Cargo.toml
 
           echo "🪛 创建 build.rs"
 
@@ -223,7 +226,6 @@ jobs:
           echo "✅ thunk-rs 注入完成"
       - name: Run build vnt-cli
         run: |
-          cargo clean
           if [[ $TARGET =~ ^mips.*$ ]]; then
             cargo +nightly build --package vnt-cli --release --verbose --target $TARGET -Z build-std=std,panic_abort --features $FEATURES
           else
