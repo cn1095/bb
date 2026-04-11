@@ -252,22 +252,12 @@ jobs:
             upx --lzma --best ./artifacts/$EXEC_VNT_CLI
           fi
           cd ./artifacts
-          tar -czf vnt-$TARGET-$TAG.tar.gz *
-          mkdir upload_file
-          mv vnt-$TARGET-$TAG.tar.gz ./upload_file/
-      - name: 发布 Release
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          set -e
-          RELEASE_TAG="vnt"
-
-          if ! gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
-            gh release create "$RELEASE_TAG" \
-              --title "$RELEASE_TAG" \
-              --latest
-          else
-            gh release edit "$RELEASE_TAG" \
-              --title "$RELEASE_TAG"
-          fi
-          gh release upload "$RELEASE_TAG" "./upload_file/vnt-$TARGET-$TAG.tar.gz" --clobber
+          # tar -czf vnt-$TARGET-$TAG.tar.gz *
+          # mkdir upload_file
+          # mv vnt-$TARGET-$TAG.tar.gz ./upload_file/
+      - name: Archive artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vnt-cli-${{ matrix.TARGET }}
+          path: |
+            ./artifacts/*
