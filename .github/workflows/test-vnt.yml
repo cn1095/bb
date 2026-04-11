@@ -200,7 +200,7 @@ jobs:
       - name: Install rust target
         if: ${{ ! startsWith(matrix.TARGET, 'mips') }}
         run: rustup target add $TARGET
-      - name: Windows7 兼容 thunk-rs 注入（echo方式）
+      - name: Windows7 兼容 thunk-rs 注入
         if: matrix.TARGET == 'x86_64-pc-windows-msvc'
         run: |
           set -e
@@ -224,6 +224,7 @@ jobs:
           echo "✅ thunk-rs 注入完成"
       - name: Run build vnt-cli
         run: |
+          cargo clean
           if [[ $TARGET =~ ^mips.*$ ]]; then
             cargo +nightly build --package vnt-cli --release --verbose --target $TARGET -Z build-std=std,panic_abort --features $FEATURES
           else
