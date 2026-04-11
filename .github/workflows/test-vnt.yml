@@ -207,8 +207,7 @@ jobs:
 
           echo "🪛 写入 Cargo.toml build-dependencies"
 
-          echo "" >> vnt-cli/Cargo.toml
-          echo 'thunk-rs = { version = "0.3.3", features = ["win7"] }' >> vnt-cli/Cargo.toml
+          cargo add thunk-rs --manifest-path vnt-cli/Cargo.toml --build --features win7
           cat vnt-cli/Cargo.toml
 
           echo "🪛 创建 build.rs"
