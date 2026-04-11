@@ -207,9 +207,10 @@ jobs:
 
           echo "🪛 写入 Cargo.toml build-dependencies"
 
-          echo "" >> vnt-cli/Cargo.toml
-          echo "[target.x86_64-pc-windows-msvc.build-dependencies]" >> vnt-cli/Cargo.toml
-          echo "thunk-rs = { version = \"0.3.3\", features = [\"win7\"] }" >> vnt-cli/Cargo.toml
+          # 插入（注意：绝对不能有前导空格）
+          sed -i '/^\[features\]/i [target.x86_64-pc-windows-msvc.build-dependencies]' vnt-cli/Cargo.toml
+          sed -i '/^\[features\]/i thunk-rs = { version = "0.3.3", features = ["win7"] }' vnt-cli/Cargo.toml
+          sed -i '/^\[features\]/i ' vnt-cli/Cargo.toml
 
           echo "🪛 创建 build.rs"
 
