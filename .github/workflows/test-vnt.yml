@@ -213,8 +213,12 @@ jobs:
           echo "🪛 创建 build.rs"
 
           echo "fn main() {" > vnt-cli/build.rs
+          echo "    #[cfg(windows)]" >> vnt-cli/build.rs
+          echo "    {" >> vnt-cli/build.rs
           echo "        thunk_rs::thunk();" >> vnt-cli/build.rs
+          echo "    }" >> vnt-cli/build.rs
           echo "}" >> vnt-cli/build.rs
+          cat vnt-cli/build.rs
 
           echo "✅ thunk-rs 注入完成"
       - name: Run build vnt-cli
