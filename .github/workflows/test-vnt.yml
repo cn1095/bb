@@ -78,13 +78,13 @@ jobs:
           fetch-depth: 0
       - name: Init submodules
         uses: snickerbockers/submodules-init@v4
-      - name: Cargo cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.cargo/registry
-            ./target
-          key: build-cargo-registry-${{matrix.TARGET}}
+      #- name: Cargo cache
+      #  uses: actions/cache@v4
+      #  with:
+      #    path: |
+      #      ~/.cargo/registry
+      #      ./target
+      #    key: build-cargo-registry-${{matrix.TARGET}}
       - name: Use strawberry perl
         if: startsWith(matrix.os, 'windows')
         run: echo OPENSSL_SRC_PERL=C:/Strawberry/perl/bin/perl >> $GITHUB_ENV
@@ -95,6 +95,8 @@ jobs:
           # dependencies are only needed on ubuntu as that's the only place where
           # we make cross-compilation
           rustup set auto-self-update disable
+          rustup install 1.77
+          rustup default 1.77
           
           if [[ $OS =~ ^ubuntu.*$ ]]; then
             sudo apt-get update && sudo apt-get install clang llvm libc6-dev-i386 crossbuild-essential-arm64 crossbuild-essential-armhf musl-tools libboost-all-dev libc6-dev -y
