@@ -74,10 +74,18 @@ jobs:
             -Dc_link_args="-static -no-pie -Wl,--gc-sections" \
             -Dcpp_link_args="-static -no-pie -Wl,--gc-sections"
 
+      - name: Install upx
+        uses: crazy-max/ghaction-upx@master
+        with:
+         version: v4.2.4
+         install-only: true
+
       - name: Build
         run: |
           cd android-tools-static
           meson compile -C build -v
+          mipsel-linux-muslsf-strip build/vendor/* || true
+          upx --best --lzma build/vendor/* || true
           file build/vendor/adb
 
       - name: Upload artifact
