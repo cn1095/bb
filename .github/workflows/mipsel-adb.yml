@@ -1,14 +1,14 @@
-name: Build adb (mipsel-muslsf static)
+name: Build adb (mipsel-muslsf, via android-tools-static meson)
 on:
   workflow_dispatch:
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Set git identity
+      - name: Install build deps
         run: |
-          git config --global user.email "ci@example.com"
-          git config --global user.name "CI Builder"
+          sudo apt-get update
+          sudo apt-get install -y meson ninja-build cmake git patch
 
       - name: Get mipsel musl softfloat toolchain
         run: |
@@ -16,97 +16,42 @@ jobs:
           tar xf mipsel-linux-muslsf-cross.tgz
           echo "$PWD/mipsel-linux-muslsf-cross/bin" >> $GITHUB_PATH
 
-      - name: Cross-compile OpenSSL (static)
+      - name: Get latest release source archive
         run: |
-          OPENSSL_VER=3.0.15
-          wget https://www.openssl.org/source/openssl-${OPENSSL_VER}.tar.gz
-          tar xf openssl-${OPENSSL_VER}.tar.gz
-          cd openssl-${OPENSSL_VER}
+          wget https://github.com/meator/android-tools-static/releases/download/35.0.2-rc.1/android-tools-static-35.0.2-rc.1-src.tar.gz
+          tar xf android-tools-static-35.0.2-rc.1-src.tar.gz
+          mv android-tools-static-* android-tools-static || true
+          ls
 
-          export PATH=$PATH:$GITHUB_WORKSPACE/mipsel-linux-muslsf-cross/bin
-          export CROSS_COMPILE=mipsel-linux-muslsf-
-
-          ./Configure linux-generic32 \
-            no-shared no-dso no-asm no-tests \
-            --prefix=$GITHUB_WORKSPACE/openssl-mipsel-muslsf \
-            --openssldir=$GITHUB_WORKSPACE/openssl-mipsel-muslsf \
-            -latomic
-
-          make -j$(nproc)
-          make install_sw
-
-      - name: Cross-compile fmt library (static)
+      - name: Write meson cross-file for mipsel-muslsf
         run: |
-          git clone --depth 1 --branch 10.2.1 https://github.com/fmtlib/fmt.git
-          cd fmt
-          export PATH=$PATH:$GITHUB_WORKSPACE/mipsel-linux-muslsf-cross/bin
-          mkdir build && cd build
-          cmake .. \
-            -DCMAKE_SYSTEM_NAME=Linux \
-            -DCMAKE_SYSTEM_PROCESSOR=mipsel \
-            -DCMAKE_C_COMPILER=mipsel-linux-muslsf-gcc \
-            -DCMAKE_CXX_COMPILER=mipsel-linux-muslsf-g++ \
-            -DCMAKE_EXE_LINKER_FLAGS="-static" \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/fmt-mipsel-muslsf \
-            -DFMT_TEST=OFF \
-            -DFMT_DOC=OFF \
-            -DBUILD_SHARED_LIBS=OFF
-          make -j$(nproc)
-          make install
+          cat > mipsel-muslsf.ini << 'EOF'
+          [binaries]
+          c = 'mipsel-linux-muslsf-gcc'
+          cpp = 'mipsel-linux-muslsf-g++'
+          ar = 'mipsel-linux-muslsf-ar'
+          strip = 'mipsel-linux-muslsf-strip'
+          pkg-config = 'pkg-config'
 
-      - name: Cross-compile brotli (static)
-        run: |
-          git clone --depth 1 --branch v1.1.0 https://github.com/google/brotli.git
-          cd brotli
-          export PATH=$PATH:$GITHUB_WORKSPACE/mipsel-linux-muslsf-cross/bin
-          mkdir build && cd build
-          cmake .. \
-            -DCMAKE_SYSTEM_NAME=Linux \
-            -DCMAKE_SYSTEM_PROCESSOR=mipsel \
-            -DCMAKE_C_COMPILER=mipsel-linux-muslsf-gcc \
-            -DCMAKE_CXX_COMPILER=mipsel-linux-muslsf-g++ \
-            -DCMAKE_EXE_LINKER_FLAGS="-static" \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/brotli-mipsel-muslsf \
-            -DBUILD_SHARED_LIBS=OFF \
-            -DBROTLI_DISABLE_TESTS=ON
-          make -j$(nproc)
-          make install
+          [host_machine]
+          system = 'linux'
+          cpu_family = 'mips'
+          cpu = 'mipsel'
+          endian = 'little'
+          EOF
 
-      - name: Download android-tools release tarball (with pairing support)
+      - name: Configure
         run: |
-          wget https://github.com/nmeum/android-tools/releases/download/35.0.2/android-tools-35.0.2.tar.xz
-          tar xf android-tools-35.0.2.tar.xz
-          mv android-tools-35.0.2 android-tools
+          cd android-tools-static
+          meson setup build --cross-file=../mipsel-muslsf.ini --default-library=static
 
-      - name: Configure & Build adb (static, linked against cross openssl)
+      - name: Build
         run: |
-          cd android-tools
-          
-          # pkg-config能找到,需要补充.pc文件搜索路径
-          echo "PKG_CONFIG_PATH=$GITHUB_WORKSPACE/brotli-mipsel-muslsf/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
-          
-          mkdir build && cd build
-          cmake .. \
-            -DCMAKE_SYSTEM_NAME=Linux \
-            -DCMAKE_SYSTEM_PROCESSOR=mipsel \
-            -DCMAKE_C_COMPILER=mipsel-linux-muslsf-gcc \
-            -DCMAKE_CXX_COMPILER=mipsel-linux-muslsf-g++ \
-            -DCMAKE_EXE_LINKER_FLAGS="-static" \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DOPENSSL_ROOT_DIR=$GITHUB_WORKSPACE/openssl-mipsel-muslsf \
-            -DOPENSSL_INCLUDE_DIR=$GITHUB_WORKSPACE/openssl-mipsel-muslsf/include \
-            -DOPENSSL_CRYPTO_LIBRARY=$GITHUB_WORKSPACE/openssl-mipsel-muslsf/lib/libcrypto.a \
-            -DOPENSSL_SSL_LIBRARY=$GITHUB_WORKSPACE/openssl-mipsel-muslsf/lib/libssl.a \
-            -Dfmt_DIR=$GITHUB_WORKSPACE/fmt-mipsel-muslsf/lib/cmake/fmt \
-            -DBUILD_ADB=ON \
-            -DBUILD_FASTBOOT=OFF \
-            -DBUILD_MKE2FS=OFF
-          make -j$(nproc) adb
+          cd android-tools-static
+          meson compile -C build
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: adb-mipsel-muslsf
-          path: android-tools/build/adb/adb
+          path: android-tools-static/build/adb/adb
