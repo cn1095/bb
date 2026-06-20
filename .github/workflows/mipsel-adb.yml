@@ -25,7 +25,6 @@ jobs:
 
           export PATH=$PATH:$GITHUB_WORKSPACE/mipsel-linux-muslsf-cross/bin
           export CROSS_COMPILE=mipsel-linux-muslsf-
-          export CC=mipsel-linux-muslsf-gcc
 
           ./Configure linux-generic32 \
             no-shared no-dso no-asm no-tests \
