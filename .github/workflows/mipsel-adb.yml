@@ -54,7 +54,10 @@ jobs:
       - name: Build
         run: |
           cd android-tools-static
-          ninja -C build -t targets || true
+          ninja -C build -t targets > ../all_targets.txt 2>&1 || true
+          wc -l ../all_targets.txt
+          echo "----- 包含adb的行 -----"
+          grep -i adb ../all_targets.txt || echo "没有匹配到任何包含adb的目标"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
