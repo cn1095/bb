@@ -29,7 +29,8 @@ jobs:
           ./Configure linux-generic32 \
             no-shared no-dso no-asm no-tests \
             --prefix=$GITHUB_WORKSPACE/openssl-mipsel-muslsf \
-            --openssldir=$GITHUB_WORKSPACE/openssl-mipsel-muslsf
+            --openssldir=$GITHUB_WORKSPACE/openssl-mipsel-muslsf \
+            -latomic
 
           make -j$(nproc)
           make install_sw
