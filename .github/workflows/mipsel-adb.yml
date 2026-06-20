@@ -20,7 +20,7 @@ jobs:
         run: |
           wget https://github.com/meator/android-tools-static/releases/download/35.0.2-rc.1/android-tools-static-35.0.2-rc.1-src.tar.gz
           tar xf android-tools-static-35.0.2-rc.1-src.tar.gz
-          mv android-tools-static-* android-tools-static || true
+          mv android-tools-static-35.0.2-rc.1-src android-tools-static
           ls
 
       - name: Write meson cross-file for mipsel-muslsf
