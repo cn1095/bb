@@ -53,10 +53,19 @@ jobs:
           endian = 'little'
           EOF
 
-      - name: Configure
+      - name: Configure (size-optimized)
         run: |
           cd android-tools-static
-          meson setup build --cross-file=../mipsel-muslsf.ini --default-library=static --wrap-mode=forcefallback --buildtype=release
+          meson setup build \
+            --cross-file=../mipsel-muslsf.ini \
+            --default-library=static \
+            --wrap-mode=forcefallback \
+            --buildtype=release \
+            --strip \
+            -Dc_args="-ffunction-sections -fdata-sections" \
+            -Dcpp_args="-ffunction-sections -fdata-sections" \
+            -Dc_link_args="-Wl,--gc-sections" \
+            -Dcpp_link_args="-Wl,--gc-sections"
 
       - name: Build
         run: |
