@@ -1,4 +1,4 @@
-name: Build adb (mipsel-muslsf, via android-tools-static meson)
+name: 在线静态编译 adb (mipsel-muslsf, via android-tools-static meson)
 on:
   workflow_dispatch:
 jobs:
