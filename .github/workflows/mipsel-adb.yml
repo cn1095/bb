@@ -51,6 +51,13 @@ jobs:
           cpu_family = 'mips'
           cpu = 'mipsel'
           endian = 'little'
+          [properties]
+          needs_exe_wrapper = true
+          [built-in options]
+          c_args = ['-static', '-ffunction-sections', '-fdata-sections', '-mno-abicalls', '-fno-pic']
+          cpp_args = ['-static', '-ffunction-sections', '-fdata-sections', '-mno-abicalls', '-fno-pic']
+          c_link_args = ['-static', '-no-pie', '-Wl,--gc-sections']
+          cpp_link_args = ['-static', '-no-pie', '-Wl,--gc-sections']
           EOF
 
       - name: Configure (size-optimized)
@@ -62,15 +69,16 @@ jobs:
             --wrap-mode=forcefallback \
             --buildtype=release \
             --strip \
-            -Dc_args="-ffunction-sections -fdata-sections" \
-            -Dcpp_args="-ffunction-sections -fdata-sections" \
-            -Dc_link_args="-Wl,--gc-sections" \
-            -Dcpp_link_args="-Wl,--gc-sections"
+            -Dc_args="-ffunction-sections -fdata-sections -static" \
+            -Dcpp_args="-ffunction-sections -fdata-sections -static" \
+            -Dc_link_args="-static -no-pie -Wl,--gc-sections" \
+            -Dcpp_link_args="-static -no-pie -Wl,--gc-sections"
 
       - name: Build
         run: |
           cd android-tools-static
-          meson compile -C build
+          meson compile -C build -v
+          file build/vendor/adb
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
