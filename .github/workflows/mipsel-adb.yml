@@ -1,18 +1,14 @@
 name: Build adb (mipsel-muslsf static)
-
 on:
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout android-tools source
+      - name: Set git identity
         run: |
-          git clone --depth 1 https://github.com/Jamim/android-tools.git
-          cd android-tools
-          # 拉取实际AOSP adb源码子模块/tarball(项目里有脚本生成)
-          ./generate-tarballs.sh adb || true
+          git config --global user.email "ci@example.com"
+          git config --global user.name "CI Builder"
 
       - name: Get mipsel musl softfloat toolchain
         run: |
@@ -20,7 +16,32 @@ jobs:
           tar xf mipsel-linux-muslsf-cross.tgz
           echo "$PWD/mipsel-linux-muslsf-cross/bin" >> $GITHUB_PATH
 
-      - name: Configure & Build (static)
+      - name: Cross-compile OpenSSL (static)
+        run: |
+          OPENSSL_VER=3.0.15
+          wget https://www.openssl.org/source/openssl-${OPENSSL_VER}.tar.gz
+          tar xf openssl-${OPENSSL_VER}.tar.gz
+          cd openssl-${OPENSSL_VER}
+
+          export PATH=$PATH:$GITHUB_WORKSPACE/mipsel-linux-muslsf-cross/bin
+          export CROSS_COMPILE=mipsel-linux-muslsf-
+          export CC=mipsel-linux-muslsf-gcc
+
+          ./Configure linux-generic32 \
+            no-shared no-dso no-asm no-tests \
+            --prefix=$GITHUB_WORKSPACE/openssl-mipsel-muslsf \
+            --openssldir=$GITHUB_WORKSPACE/openssl-mipsel-muslsf
+
+          make -j$(nproc)
+          make install_sw
+
+      - name: Checkout android-tools source
+        run: |
+          git clone --depth 1 https://github.com/Jamim/android-tools.git
+          cd android-tools
+          ./generate-tarballs.sh adb || true
+
+      - name: Configure & Build adb (static, linked against cross openssl)
         run: |
           cd android-tools
           mkdir build && cd build
@@ -31,6 +52,10 @@ jobs:
             -DCMAKE_CXX_COMPILER=mipsel-linux-muslsf-g++ \
             -DCMAKE_EXE_LINKER_FLAGS="-static" \
             -DCMAKE_BUILD_TYPE=Release \
+            -DOPENSSL_ROOT_DIR=$GITHUB_WORKSPACE/openssl-mipsel-muslsf \
+            -DOPENSSL_INCLUDE_DIR=$GITHUB_WORKSPACE/openssl-mipsel-muslsf/include \
+            -DOPENSSL_CRYPTO_LIBRARY=$GITHUB_WORKSPACE/openssl-mipsel-muslsf/lib/libcrypto.a \
+            -DOPENSSL_SSL_LIBRARY=$GITHUB_WORKSPACE/openssl-mipsel-muslsf/lib/libssl.a \
             -DBUILD_ADB=ON \
             -DBUILD_FASTBOOT=OFF \
             -DBUILD_MKE2FS=OFF
