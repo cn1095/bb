@@ -55,6 +55,25 @@ jobs:
           make -j$(nproc)
           make install
 
+      - name: Cross-compile brotli (static)
+        run: |
+          git clone --depth 1 --branch v1.1.0 https://github.com/google/brotli.git
+          cd brotli
+          export PATH=$PATH:$GITHUB_WORKSPACE/mipsel-linux-muslsf-cross/bin
+          mkdir build && cd build
+          cmake .. \
+            -DCMAKE_SYSTEM_NAME=Linux \
+            -DCMAKE_SYSTEM_PROCESSOR=mipsel \
+            -DCMAKE_C_COMPILER=mipsel-linux-muslsf-gcc \
+            -DCMAKE_CXX_COMPILER=mipsel-linux-muslsf-g++ \
+            -DCMAKE_EXE_LINKER_FLAGS="-static" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_INSTALL_PREFIX=$GITHUB_WORKSPACE/brotli-mipsel-muslsf \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DBROTLI_DISABLE_TESTS=ON
+          make -j$(nproc)
+          make install
+
       - name: Download android-tools release tarball (with pairing support)
         run: |
           wget https://github.com/nmeum/android-tools/releases/download/35.0.2/android-tools-35.0.2.tar.xz
@@ -64,6 +83,10 @@ jobs:
       - name: Configure & Build adb (static, linked against cross openssl)
         run: |
           cd android-tools
+          
+          # pkg-config能找到,需要补充.pc文件搜索路径
+          echo "PKG_CONFIG_PATH=$GITHUB_WORKSPACE/brotli-mipsel-muslsf/lib/pkgconfig:$PKG_CONFIG_PATH" >> $GITHUB_ENV
+          
           mkdir build && cd build
           cmake .. \
             -DCMAKE_SYSTEM_NAME=Linux \
