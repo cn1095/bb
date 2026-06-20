@@ -1,0 +1,43 @@
+name: Build adb (mipsel-muslsf static)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout android-tools source
+        run: |
+          git clone --depth 1 https://github.com/Jamim/android-tools.git
+          cd android-tools
+          # 拉取实际AOSP adb源码子模块/tarball(项目里有脚本生成)
+          ./generate-tarballs.sh adb || true
+
+      - name: Get mipsel musl softfloat toolchain
+        run: |
+          wget https://github.com/lmq8267/Toolchain/releases/download/musl-cross/mipsel-linux-muslsf-cross.tgz
+          tar xf mipsel-linux-muslsf-cross.tgz
+          echo "$PWD/mipsel-linux-muslsf-cross/bin" >> $GITHUB_PATH
+
+      - name: Configure & Build (static)
+        run: |
+          cd android-tools
+          mkdir build && cd build
+          cmake .. \
+            -DCMAKE_SYSTEM_NAME=Linux \
+            -DCMAKE_SYSTEM_PROCESSOR=mipsel \
+            -DCMAKE_C_COMPILER=mipsel-linux-muslsf-gcc \
+            -DCMAKE_CXX_COMPILER=mipsel-linux-muslsf-g++ \
+            -DCMAKE_EXE_LINKER_FLAGS="-static" \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_ADB=ON \
+            -DBUILD_FASTBOOT=OFF \
+            -DBUILD_MKE2FS=OFF
+          make -j$(nproc) adb
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: adb-mipsel-muslsf
+          path: android-tools/build/adb/adb
