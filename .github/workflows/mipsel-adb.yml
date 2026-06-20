@@ -30,6 +30,13 @@ jobs:
           echo "----- 确认修改结果 -----"
           sed -n '48,58p' "$FILE"
 
+      - name: Patch SEEK_DATA/SEEK_HOLE for musl (libsparse)
+        run: |
+          FILE=android-tools-static/vendor/core/libsparse/sparse_read.cpp
+          sed -i '1i #ifndef SEEK_DATA\n#define SEEK_DATA 3\n#endif\n#ifndef SEEK_HOLE\n#define SEEK_HOLE 4\n#endif' "$FILE"
+          echo "----- 确认修改结果 -----"
+          head -10 "$FILE"
+
       - name: Write meson cross-file for mipsel-muslsf
         run: |
           cat > mipsel-muslsf.ini << 'EOF'
@@ -54,10 +61,7 @@ jobs:
       - name: Build
         run: |
           cd android-tools-static
-          ninja -C build -t targets > ../all_targets.txt 2>&1 || true
-          wc -l ../all_targets.txt
-          echo "----- 包含adb的行 -----"
-          grep -i adb ../all_targets.txt || echo "没有匹配到任何包含adb的目标"
+          meson compile -C build
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
