@@ -35,11 +35,11 @@ jobs:
           make -j$(nproc)
           make install_sw
 
-      - name: Checkout android-tools source
+      - name: Download android-tools release tarball (with pairing support)
         run: |
-          git clone --depth 1 https://github.com/Jamim/android-tools.git
-          cd android-tools
-          ./generate-tarballs.sh adb || true
+          wget https://github.com/nmeum/android-tools/releases/download/35.0.2/android-tools-35.0.2.tar.xz
+          tar xf android-tools-35.0.2.tar.xz
+          mv android-tools-35.0.2 android-tools
 
       - name: Configure & Build adb (static, linked against cross openssl)
         run: |
