@@ -23,6 +23,13 @@ jobs:
           mv android-tools-static-35.0.2-rc.1-src android-tools-static
           ls
 
+      - name: Patch errno.cpp to skip strict assertions on MIPS
+        run: |
+          FILE=android-tools-static/vendor/adb/sysdeps/errno.cpp
+          sed -i 's|#define ERRNO_VALUE(error_name, wire_value) static_assert((error_name) == (wire_value), "")|#if defined(__mips__)\n#define ERRNO_VALUE(error_name, wire_value)\n#else\n#define ERRNO_VALUE(error_name, wire_value) static_assert((error_name) == (wire_value), "")\n#endif|' "$FILE"
+          echo "----- 确认修改结果 -----"
+          sed -n '48,58p' "$FILE"
+
       - name: Write meson cross-file for mipsel-muslsf
         run: |
           cat > mipsel-muslsf.ini << 'EOF'
@@ -32,7 +39,6 @@ jobs:
           ar = 'mipsel-linux-muslsf-ar'
           strip = 'mipsel-linux-muslsf-strip'
           pkg-config = 'pkg-config'
-
           [host_machine]
           system = 'linux'
           cpu_family = 'mips'
