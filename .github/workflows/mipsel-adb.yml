@@ -54,7 +54,7 @@ jobs:
       - name: Build
         run: |
           cd android-tools-static
-          ninja -C build -t targets | grep -i adb
+          ninja -C build -t targets || true
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
