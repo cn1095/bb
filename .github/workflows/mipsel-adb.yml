@@ -56,7 +56,7 @@ jobs:
       - name: Configure
         run: |
           cd android-tools-static
-          meson setup build --cross-file=../mipsel-muslsf.ini --default-library=static --wrap-mode=forcefallback
+          meson setup build --cross-file=../mipsel-muslsf.ini --default-library=static --wrap-mode=forcefallback --buildtype=release
 
       - name: Build
         run: |
