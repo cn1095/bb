@@ -38,11 +38,14 @@ jobs:
           perl -0pi -e 's|std::string path = android::base::GetExecutablePath\(\);|std::string path = adb_executable_path();|' "$FILE"
           perl -0pi -e 's|status.set_executable_absolute_path\(android::base::GetExecutablePath\(\)\);|status.set_executable_absolute_path(adb_executable_path());|' "$FILE"
           perl -0pi -e 's|std::string adb_version\(\) \{\n|static std::string adb_executable_path() {\n    std::string path = android::base::GetExecutablePath();\n    if (path.empty() \&\& __adb_argv \&\& __adb_argv[0] \&\& __adb_argv[0][0]) {\n        path = __adb_argv[0];\n    }\n    return path;\n}\n\nstd::string adb_version() {\n|' "$FILE"
-          perl -0pi -e 's|        int result = execv\(path.c_str\(\), const_cast<char\\* const\\*>\(child_argv.data\(\)\)\);\n|        int result;\n        if (strchr(path.c_str(), '\''/'\'')) {\n            result = execv(path.c_str(), const_cast<char* const*>(child_argv.data()));\n        } else {\n            result = execvp(path.c_str(), const_cast<char* const*>(child_argv.data()));\n        }\n|' "$FILE"
+          perl -0pi -e 's|        int result = execv\(path\.c_str\(\), const_cast<char\* const\*>\(child_argv\.data\(\)\)\);|        int result;\n        if (strchr(path.c_str(), '\''/'\'')) {\n            result = execv(path.c_str(), const_cast<char* const*>(child_argv.data()));\n        } else {\n            result = execvp(path.c_str(), const_cast<char* const*>(child_argv.data()));\n        }|' "$FILE"
+          ! grep -F 'int result = execv(path.c_str(), const_cast<char* const*>(child_argv.data()));' "$FILE"
+          grep -F 'static std::string adb_executable_path()' "$FILE"
+          grep -F 'result = execvp(path.c_str(), const_cast<char* const*>(child_argv.data()));' "$FILE"
           echo "----- 确认修改结果 -----"
           sed -n '73,82p' "$FILE"
-          sed -n '96,116p' "$FILE"
-          sed -n '1040,1084p' "$FILE"
+          sed -n '96,122p' "$FILE"
+          sed -n '1040,1090p' "$FILE"
 
       - name: Patch SEEK_DATA/SEEK_HOLE for musl (libsparse)
         run: |
