@@ -30,6 +30,13 @@ jobs:
           echo "----- 确认修改结果 -----"
           sed -n '48,58p' "$FILE"
 
+      - name: Patch adb executable path fallback
+        run: |
+          FILE=android-tools-static/vendor/libbase/file.cpp
+          perl -0pi -e 's|std::string GetExecutablePath\(\) \{\n#if defined\(__linux__\)\n  std::string path;\n  android::base::Readlink\("/proc/self/exe", &path\);\n  return path;\n|std::string GetExecutablePath() {\n#if defined(__linux__)\n  std::string path;\n  if (android::base::Readlink("/proc/self/exe", \&path) \&\& !path.empty()) {\n    return path;\n  }\n  return "/proc/self/exe";\n|' "$FILE"
+          echo "----- 确认修改结果 -----"
+          sed -n '488,498p' "$FILE"
+
       - name: Patch SEEK_DATA/SEEK_HOLE for musl (libsparse)
         run: |
           FILE=android-tools-static/vendor/core/libsparse/sparse_read.cpp
