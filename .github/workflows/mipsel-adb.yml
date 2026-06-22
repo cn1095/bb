@@ -32,10 +32,17 @@ jobs:
 
       - name: Patch adb executable path fallback
         run: |
-          FILE=android-tools-static/vendor/libbase/file.cpp
-          perl -0pi -e 's|std::string GetExecutablePath\(\) \{\n#if defined\(__linux__\)\n  std::string path;\n  android::base::Readlink\("/proc/self/exe", &path\);\n  return path;\n|std::string GetExecutablePath() {\n#if defined(__linux__)\n  std::string path;\n  if (android::base::Readlink("/proc/self/exe", \&path) \&\& !path.empty()) {\n    return path;\n  }\n  return "/proc/self/exe";\n|' "$FILE"
+          FILE=android-tools-static/vendor/adb/adb.cpp
+          perl -0pi -e 's|#include "adb_host.pb.h"\n#include "client/usb.h"\n|#include "adb_host.pb.h"\n#include "client/adb_client.h"\n#include "client/usb.h"\n|' "$FILE"
+          perl -0pi -e 's|android::base::GetExecutablePath\(\)\.c_str\(\)|adb_executable_path().c_str()|g' "$FILE"
+          perl -0pi -e 's|std::string path = android::base::GetExecutablePath\(\);|std::string path = adb_executable_path();|' "$FILE"
+          perl -0pi -e 's|status.set_executable_absolute_path\(android::base::GetExecutablePath\(\)\);|status.set_executable_absolute_path(adb_executable_path());|' "$FILE"
+          perl -0pi -e 's|std::string adb_version\(\) \{\n|static std::string adb_executable_path() {\n    std::string path = android::base::GetExecutablePath();\n    if (path.empty() \&\& __adb_argv \&\& __adb_argv[0] \&\& __adb_argv[0][0]) {\n        path = __adb_argv[0];\n    }\n    return path;\n}\n\nstd::string adb_version() {\n|' "$FILE"
+          perl -0pi -e 's|        int result = execv\(path.c_str\(\), const_cast<char\\* const\\*>\(child_argv.data\(\)\)\);\n|        int result;\n        if (strchr(path.c_str(), '\''/'\'')) {\n            result = execv(path.c_str(), const_cast<char* const*>(child_argv.data()));\n        } else {\n            result = execvp(path.c_str(), const_cast<char* const*>(child_argv.data()));\n        }\n|' "$FILE"
           echo "----- 确认修改结果 -----"
-          sed -n '488,498p' "$FILE"
+          sed -n '73,82p' "$FILE"
+          sed -n '96,116p' "$FILE"
+          sed -n '1040,1084p' "$FILE"
 
       - name: Patch SEEK_DATA/SEEK_HOLE for musl (libsparse)
         run: |
